@@ -16,20 +16,23 @@ namespace GameOfLife.Manager
         [Header("Tick Settings")]
         [SerializeField] private float tickRate = 1f; // 틱 속도 (1초 = 1틱/초)
 
-        [Header("Initial Pattern")]
+        [Header("Stage Settings")]
+        [SerializeField] private GameRuleType currentStage = GameRuleType.ConwayLife;
         [SerializeField] private bool spawnInitialPattern = true;
 
         [Header("Auto Spawn Settings")]
-        [SerializeField] private bool autoSpawnPatterns = true; // 자동 패턴 생성 활성화
+        [SerializeField] private bool autoSpawnPatterns = false; // 스테이지 모드에서는 기본 false
         [SerializeField] private float spawnInterval = 15f; // 패턴 생성 간격 (초)
 
         private GridManager gridManager;
         private float tickTimer;
         private float spawnTimer;
         private int tickCount = 0;
+        private Vector2Int kernelPosition; // 목표 지점
 
         public GridManager Grid => gridManager;
         public float TickRate => tickRate;
+        public GameRuleType CurrentStage => currentStage;
 
         void Awake()
         {
@@ -40,7 +43,7 @@ namespace GameOfLife.Manager
         {
             if (spawnInitialPattern)
             {
-                SpawnMazePattern();
+                LoadStage(currentStage);
             }
         }
 
@@ -86,7 +89,7 @@ namespace GameOfLife.Manager
         }
 
         /// <summary>
-        /// 콘웨이의 생명 게임 규칙에 따라 다음 상태를 계산합니다.
+        /// 현재 스테이지의 규칙에 따라 다음 상태를 계산합니다.
         /// </summary>
         private void CalculateNextState()
         {
@@ -95,43 +98,110 @@ namespace GameOfLife.Manager
                 for (int y = 0; y < gridManager.Height; y++)
                 {
                     Cell cell = gridManager.GetCell(x, y);
+
+                    // 커널과 플레이어 설치 세포는 규칙 적용 제외
+                    if (cell.Type == CellType.Kernel || cell.Type == CellType.Placed)
+                    {
+                        cell.WillBeAlive = cell.IsAlive;
+                        continue;
+                    }
+
                     int liveNeighbors = gridManager.CountLiveNeighbors(x, y);
 
-                    // 콘웨이의 생명 게임 규칙
-                    if (cell.IsAlive)
+                    // 스테이지별 규칙 적용
+                    switch (currentStage)
                     {
-                        // 살아있는 세포
-                        if (liveNeighbors <= 1)
-                        {
-                            // 고립: 주변에 1개 이하 -> 죽음
-                            cell.WillBeAlive = false;
-                        }
-                        else if (liveNeighbors >= 4)
-                        {
-                            // 과밀: 주변에 4개 이상 -> 죽음
-                            cell.WillBeAlive = false;
-                        }
-                        else
-                        {
-                            // 2~3개: 생존
-                            cell.WillBeAlive = true;
-                        }
-                    }
-                    else
-                    {
-                        // 죽어있는 세포
-                        if (liveNeighbors == 3)
-                        {
-                            // 탄생: 정확히 3개 -> 새로운 세포 탄생
-                            cell.WillBeAlive = true;
-                            cell.Type = CellType.Enemy; // 새로 태어난 세포는 적
-                        }
-                        else
-                        {
-                            cell.WillBeAlive = false;
-                        }
+                        case GameRuleType.ConwayLife:
+                            ApplyConwayRule(cell, liveNeighbors);
+                            break;
+                        case GameRuleType.HighLife:
+                            ApplyHighLifeRule(cell, liveNeighbors);
+                            break;
+                        case GameRuleType.Maze:
+                            ApplyMazeRule(cell, liveNeighbors);
+                            break;
+                        case GameRuleType.DayAndNight:
+                            ApplyDayAndNightRule(cell, liveNeighbors);
+                            break;
+                        case GameRuleType.Seeds:
+                            ApplySeedsRule(cell, liveNeighbors);
+                            break;
                     }
                 }
+            }
+        }
+
+        // === 각 규칙 구현 ===
+
+        private void ApplyConwayRule(Cell cell, int neighbors)
+        {
+            // B3/S23 - 기본 콘웨이
+            if (cell.IsAlive)
+            {
+                cell.WillBeAlive = (neighbors == 2 || neighbors == 3);
+            }
+            else
+            {
+                cell.WillBeAlive = (neighbors == 3);
+                if (cell.WillBeAlive) cell.Type = CellType.Enemy;
+            }
+        }
+
+        private void ApplyHighLifeRule(Cell cell, int neighbors)
+        {
+            // B36/S23 - Replicator 패턴 존재
+            if (cell.IsAlive)
+            {
+                cell.WillBeAlive = (neighbors == 2 || neighbors == 3);
+            }
+            else
+            {
+                cell.WillBeAlive = (neighbors == 3 || neighbors == 6);
+                if (cell.WillBeAlive) cell.Type = CellType.Enemy;
+            }
+        }
+
+        private void ApplyMazeRule(Cell cell, int neighbors)
+        {
+            // B3/S12345 - 미로 생성
+            if (cell.IsAlive)
+            {
+                cell.WillBeAlive = (neighbors >= 1 && neighbors <= 5);
+            }
+            else
+            {
+                cell.WillBeAlive = (neighbors == 3);
+                if (cell.WillBeAlive) cell.Type = CellType.Enemy;
+            }
+        }
+
+        private void ApplyDayAndNightRule(Cell cell, int neighbors)
+        {
+            // B3678/S34678 - 대칭 규칙
+            if (cell.IsAlive)
+            {
+                cell.WillBeAlive = (neighbors == 3 || neighbors == 4 ||
+                                   neighbors == 6 || neighbors == 7 || neighbors == 8);
+            }
+            else
+            {
+                cell.WillBeAlive = (neighbors == 3 || neighbors == 6 ||
+                                   neighbors == 7 || neighbors == 8);
+                if (cell.WillBeAlive) cell.Type = CellType.Enemy;
+            }
+        }
+
+        private void ApplySeedsRule(Cell cell, int neighbors)
+        {
+            // B2/S - 모든 세포가 1틱만 생존 (폭발형)
+            if (cell.IsAlive)
+            {
+                cell.WillBeAlive = false; // 항상 죽음
+            }
+            else
+            {
+                cell.WillBeAlive = (neighbors == 2);
+                if (cell.WillBeAlive) cell.Type = CellType.Enemy;
             }
         }
 
@@ -144,6 +214,158 @@ namespace GameOfLife.Manager
             {
                 cell.ApplyNextState();
             }
+        }
+
+        // === 스테이지 로드 시스템 ===
+
+        public void LoadStage(GameRuleType stage)
+        {
+            currentStage = stage;
+            ClearGrid();
+
+            switch (stage)
+            {
+                case GameRuleType.ConwayLife:
+                    LoadStage1_Conway();
+                    break;
+                case GameRuleType.HighLife:
+                    LoadStage2_HighLife();
+                    break;
+                case GameRuleType.Maze:
+                    LoadStage3_Maze();
+                    break;
+                case GameRuleType.DayAndNight:
+                    LoadStage4_DayAndNight();
+                    break;
+                case GameRuleType.Seeds:
+                    LoadStage5_Seeds();
+                    break;
+            }
+
+            Debug.Log($"Loaded Stage: {stage}");
+        }
+
+        private void ClearGrid()
+        {
+            for (int x = 0; x < gridManager.Width; x++)
+            {
+                for (int y = 0; y < gridManager.Height; y++)
+                {
+                    gridManager.SetCellAlive(x, y, false);
+                }
+            }
+        }
+
+        // === 스테이지별 레벨 디자인 ===
+
+        private void LoadStage1_Conway()
+        {
+            // 스테이지 1: 튜토리얼 - 기본 콘웨이 규칙
+            CreateStageBoundary();
+
+            // 간단한 미로
+            CreateHorizontalPlatform(10, 10, 12);
+            CreateHorizontalPlatform(28, 10, 12);
+            CreateHorizontalPlatform(15, 18, 20);
+
+            // 초기 패턴
+            SpawnGliderPattern(8, 8);
+            SpawnBlinkerPattern(30, 15);
+
+            // 커널 (목표 지점) - 우상단
+            kernelPosition = new Vector2Int(42, 22);
+            gridManager.SetCellAlive(kernelPosition.x, kernelPosition.y, true, CellType.Kernel);
+        }
+
+        private void LoadStage2_HighLife()
+        {
+            // 스테이지 2: HighLife - Replicator 패턴
+            CreateStageBoundary();
+
+            // 복잡한 미로
+            CreateHorizontalPlatform(8, 8, 15);
+            CreateHorizontalPlatform(27, 8, 15);
+            CreateVerticalWall(23, 10, 8);
+            CreateBox(15, 14, 8, 3);
+
+            // HighLife 특화 패턴
+            SpawnReplicatorPattern(10, 12);
+            SpawnPulsarPattern(32, 18);
+
+            // 커널
+            kernelPosition = new Vector2Int(40, 20);
+            gridManager.SetCellAlive(kernelPosition.x, kernelPosition.y, true, CellType.Kernel);
+        }
+
+        private void LoadStage3_Maze()
+        {
+            // 스테이지 3: Maze - 미로 생성 규칙
+            CreateStageBoundary();
+
+            // 미로 규칙이 자동으로 미로를 생성하므로 초기 씨앗만 배치
+            for (int i = 0; i < 5; i++)
+            {
+                int x = Random.Range(10, 40);
+                int y = Random.Range(10, 20);
+                CreateBox(x, y, 3, 3);
+            }
+
+            // 커널
+            kernelPosition = new Vector2Int(43, 23);
+            gridManager.SetCellAlive(kernelPosition.x, kernelPosition.y, true, CellType.Kernel);
+        }
+
+        private void LoadStage4_DayAndNight()
+        {
+            // 스테이지 4: Day & Night - 매우 활발한 규칙
+            CreateStageBoundary();
+
+            // 안전 지대 (플레이어용)
+            CreateBox(12, 12, 6, 6);
+
+            // 초기 폭발 지점
+            SpawnAcornPattern(25, 15);
+            SpawnRPentominoPattern(18, 20);
+
+            // 커널
+            kernelPosition = new Vector2Int(38, 22);
+            gridManager.SetCellAlive(kernelPosition.x, kernelPosition.y, true, CellType.Kernel);
+        }
+
+        private void LoadStage5_Seeds()
+        {
+            // 스테이지 5: Seeds - 폭발형 (최고 난이도)
+            CreateStageBoundary();
+
+            // 플레이어 시작 지점 보호
+            CreateBox(24, 24, 2, 2);
+
+            // Seeds 패턴 (2개 이웃이면 탄생)
+            SpawnBlinkerPattern(15, 15);
+            SpawnBlinkerPattern(35, 15);
+
+            // 커널
+            kernelPosition = new Vector2Int(25, 8);
+            gridManager.SetCellAlive(kernelPosition.x, kernelPosition.y, true, CellType.Kernel);
+        }
+
+        private void CreateStageBoundary()
+        {
+            // 외곽 경계 생성
+            CreateHorizontalPlatform(5, 5, 40);
+            CreateHorizontalPlatform(5, 24, 40);
+            CreateVerticalWall(5, 5, 20);
+            CreateVerticalWall(44, 5, 20);
+        }
+
+        private void SpawnReplicatorPattern(int startX, int startY)
+        {
+            // HighLife 전용 Replicator 씨앗
+            gridManager.SetCellAlive(startX, startY, true);
+            gridManager.SetCellAlive(startX + 1, startY, true);
+            gridManager.SetCellAlive(startX + 2, startY, true);
+            gridManager.SetCellAlive(startX, startY + 1, true);
+            gridManager.SetCellAlive(startX + 1, startY + 2, true);
         }
 
         // === 초기 패턴 생성 메서드 ===

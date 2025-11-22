@@ -32,6 +32,19 @@ namespace GameOfLife.Core
     {
         Enemy,      // 흰색 세포 (적)
         Player,     // 붉은색 플레이어
-        Placed      // 플레이어가 설치한 세포
+        Placed,     // 플레이어가 설치한 세포
+        Kernel      // 목표 지점 (스테이지 클리어)
+    }
+
+    /// <summary>
+    /// 생명 게임 규칙 변형
+    /// </summary>
+    public enum GameRuleType
+    {
+        ConwayLife,     // 기본 콘웨이 (B3/S23)
+        HighLife,       // Replicator 패턴 (B36/S23)
+        Maze,           // 미로 생성 (B3/S12345)
+        DayAndNight,    // 대칭 규칙 (B3678/S34678)
+        Seeds           // 폭발형 (B2/S)
     }
 }

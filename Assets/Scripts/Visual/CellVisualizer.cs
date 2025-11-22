@@ -18,6 +18,7 @@ namespace GameOfLife.Visual
         [SerializeField] private Color enemyColor = Color.white;      // 적 세포 (형광 흰색)
         [SerializeField] private Color playerColor = Color.red;       // 플레이어 (붉은색)
         [SerializeField] private Color placedColor = new Color(1f, 0.5f, 0.5f); // 설치한 세포 (연한 붉은색)
+        [SerializeField] private Color kernelColor = new Color(0f, 1f, 0f, 1f); // 커널 (녹색)
         [SerializeField] private Color previewColor = new Color(0.5f, 0.5f, 0.5f, 0.3f); // 예측 (희미한 회색)
         [SerializeField] private bool showPreview = true;
 
@@ -126,6 +127,8 @@ namespace GameOfLife.Visual
                     return playerColor;
                 case CellType.Placed:
                     return placedColor;
+                case CellType.Kernel:
+                    return kernelColor;
                 default:
                     return Color.white;
             }

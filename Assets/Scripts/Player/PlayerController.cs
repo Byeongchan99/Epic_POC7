@@ -66,8 +66,59 @@ namespace GameOfLife.Player
         {
             HandleMovement();
             HandleMouseInput();
+            HandleStageSwitch();
             UpdateInvincibility();
             CheckCollisionWithEnemyCells();
+        }
+
+        private void HandleStageSwitch()
+        {
+            // 1~5번 키로 스테이지 전환
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                LoadStage(GameRuleType.ConwayLife);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                LoadStage(GameRuleType.HighLife);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                LoadStage(GameRuleType.Maze);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha4))
+            {
+                LoadStage(GameRuleType.DayAndNight);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha5))
+            {
+                LoadStage(GameRuleType.Seeds);
+            }
+            // R키로 현재 스테이지 재시작
+            else if (Input.GetKeyDown(KeyCode.R))
+            {
+                LoadStage(gameManager.CurrentStage);
+            }
+        }
+
+        private void LoadStage(GameRuleType stage)
+        {
+            if (gameManager == null) return;
+
+            // 타임스케일 정상화
+            Time.timeScale = 1f;
+
+            // 체력 복구
+            currentHealth = maxHealth;
+            invincibilityTimer = 0f;
+
+            // 플레이어 위치 초기화
+            transform.position = Vector3.zero;
+
+            // 스테이지 로드
+            gameManager.LoadStage(stage);
+
+            Debug.Log($"Switched to Stage: {stage}");
         }
 
         private void HandleMovement()
@@ -190,14 +241,31 @@ namespace GameOfLife.Player
 
         private void CheckCollisionWithEnemyCells()
         {
-            if (IsInvincible || gameManager == null) return;
+            if (gameManager == null || gameManager.Grid == null) return;
 
             Cell playerCell = gameManager.Grid.GetCell(currentGridPos.x, currentGridPos.y);
 
-            if (playerCell != null && playerCell.IsAlive && playerCell.Type == CellType.Enemy)
+            if (playerCell == null) return;
+
+            // 커널 도달 시 스테이지 클리어
+            if (playerCell.IsAlive && playerCell.Type == CellType.Kernel)
+            {
+                StageClear();
+                return;
+            }
+
+            // 적 세포와 충돌 시 데미지
+            if (!IsInvincible && playerCell.IsAlive && playerCell.Type == CellType.Enemy)
             {
                 TakeDamage();
             }
+        }
+
+        private void StageClear()
+        {
+            Debug.Log("Stage Clear!");
+            // TODO: 다음 스테이지 로드 또는 클리어 UI 표시
+            Time.timeScale = 0f; // 일시 정지
         }
 
         private void TakeDamage()
