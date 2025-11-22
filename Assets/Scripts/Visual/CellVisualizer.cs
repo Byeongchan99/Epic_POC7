@@ -47,7 +47,7 @@ namespace GameOfLife.Visual
         private void CreateDefaultCellPrefab()
         {
             // 기본 셀 프리팹 생성 (SpriteRenderer with Sprite)
-            cellPrefab = new GameObject("Cell");
+            cellPrefab = new GameObject("CellPrefab");
             SpriteRenderer sr = cellPrefab.AddComponent<SpriteRenderer>();
 
             // 흰색 정사각형 스프라이트 생성
@@ -55,6 +55,10 @@ namespace GameOfLife.Visual
             sr.color = Color.white;
 
             cellPrefab.transform.localScale = Vector3.one * gameManager.Grid.CellSize * 0.9f;
+
+            // 프리팹을 씬에서 숨김 (하이어라키에 표시되지 않음)
+            cellPrefab.hideFlags = HideFlags.HideInHierarchy;
+            cellPrefab.SetActive(false);
         }
 
         private Sprite CreateSquareSprite()

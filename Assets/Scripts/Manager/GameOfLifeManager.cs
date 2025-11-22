@@ -29,10 +29,13 @@ namespace GameOfLife.Manager
         private float spawnTimer;
         private int tickCount = 0;
         private Vector2Int kernelPosition; // 목표 지점
+        private Vector2Int playerStartPosition; // 플레이어 시작 위치
 
         public GridManager Grid => gridManager;
         public float TickRate => tickRate;
         public GameRuleType CurrentStage => currentStage;
+        public Vector2Int KernelPosition => kernelPosition;
+        public Vector2Int PlayerStartPosition => playerStartPosition;
 
         void Awake()
         {
@@ -263,13 +266,16 @@ namespace GameOfLife.Manager
             // 스테이지 1: 튜토리얼 - 기본 콘웨이 규칙
             CreateStageBoundary();
 
+            // 플레이어 시작 위치 - 좌하단
+            playerStartPosition = new Vector2Int(8, 8);
+
             // 간단한 미로
             CreateHorizontalPlatform(10, 10, 12);
             CreateHorizontalPlatform(28, 10, 12);
             CreateHorizontalPlatform(15, 18, 20);
 
             // 초기 패턴
-            SpawnGliderPattern(8, 8);
+            SpawnGliderPattern(12, 12);
             SpawnBlinkerPattern(30, 15);
 
             // 커널 (목표 지점) - 우상단
@@ -281,6 +287,9 @@ namespace GameOfLife.Manager
         {
             // 스테이지 2: HighLife - Replicator 패턴
             CreateStageBoundary();
+
+            // 플레이어 시작 위치
+            playerStartPosition = new Vector2Int(7, 10);
 
             // 복잡한 미로
             CreateHorizontalPlatform(8, 8, 15);
@@ -302,6 +311,9 @@ namespace GameOfLife.Manager
             // 스테이지 3: Maze - 미로 생성 규칙
             CreateStageBoundary();
 
+            // 플레이어 시작 위치
+            playerStartPosition = new Vector2Int(7, 7);
+
             // 미로 규칙이 자동으로 미로를 생성하므로 초기 씨앗만 배치
             for (int i = 0; i < 5; i++)
             {
@@ -320,6 +332,9 @@ namespace GameOfLife.Manager
             // 스테이지 4: Day & Night - 매우 활발한 규칙
             CreateStageBoundary();
 
+            // 플레이어 시작 위치 - 안전 지대 중앙
+            playerStartPosition = new Vector2Int(15, 15);
+
             // 안전 지대 (플레이어용)
             CreateBox(12, 12, 6, 6);
 
@@ -337,8 +352,11 @@ namespace GameOfLife.Manager
             // 스테이지 5: Seeds - 폭발형 (최고 난이도)
             CreateStageBoundary();
 
+            // 플레이어 시작 위치
+            playerStartPosition = new Vector2Int(25, 22);
+
             // 플레이어 시작 지점 보호
-            CreateBox(24, 24, 2, 2);
+            CreateBox(23, 20, 4, 4);
 
             // Seeds 패턴 (2개 이웃이면 탄생)
             SpawnBlinkerPattern(15, 15);

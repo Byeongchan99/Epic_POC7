@@ -57,8 +57,12 @@ namespace GameOfLife.Player
                 mainCamera = Camera.main;
             }
 
-            // 플레이어를 그리드 중앙에 배치
-            transform.position = Vector3.zero;
+            // 플레이어를 스테이지 시작 위치에 배치
+            if (gameManager != null && gameManager.Grid != null)
+            {
+                Vector2Int startGridPos = gameManager.PlayerStartPosition;
+                transform.position = gameManager.Grid.GridToWorldPosition(startGridPos.x, startGridPos.y);
+            }
             UpdateGridPosition();
         }
 
@@ -112,13 +116,14 @@ namespace GameOfLife.Player
             currentHealth = maxHealth;
             invincibilityTimer = 0f;
 
-            // 플레이어 위치 초기화
-            transform.position = Vector3.zero;
-
             // 스테이지 로드
             gameManager.LoadStage(stage);
 
-            Debug.Log($"Switched to Stage: {stage}");
+            // 플레이어 위치를 스테이지 시작 위치로 설정
+            Vector2Int startGridPos = gameManager.PlayerStartPosition;
+            transform.position = gameManager.Grid.GridToWorldPosition(startGridPos.x, startGridPos.y);
+
+            Debug.Log($"Switched to Stage: {stage} at position {startGridPos}");
         }
 
         private void HandleMovement()
