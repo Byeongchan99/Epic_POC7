@@ -248,19 +248,20 @@ namespace GameOfLife.Player
         {
             if (gameManager == null || gameManager.Grid == null) return;
 
-            Cell playerCell = gameManager.Grid.GetCell(currentGridPos.x, currentGridPos.y);
-
-            if (playerCell == null) return;
-
-            // 커널 도달 시 스테이지 클리어
-            if (playerCell.IsAlive && playerCell.Type == CellType.Kernel)
+            // 커널 오브젝트와의 거리 체크
+            if (gameManager.Kernel != null)
             {
-                StageClear();
-                return;
+                float distanceToKernel = Vector3.Distance(transform.position, gameManager.Kernel.transform.position);
+                if (distanceToKernel < 0.5f) // 0.5 유닛 이내면 도달
+                {
+                    StageClear();
+                    return;
+                }
             }
 
             // 적 세포와 충돌 시 데미지
-            if (!IsInvincible && playerCell.IsAlive && playerCell.Type == CellType.Enemy)
+            Cell playerCell = gameManager.Grid.GetCell(currentGridPos.x, currentGridPos.y);
+            if (playerCell != null && !IsInvincible && playerCell.IsAlive && playerCell.Type == CellType.Enemy)
             {
                 TakeDamage();
             }

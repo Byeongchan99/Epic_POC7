@@ -36,12 +36,14 @@ namespace GameOfLife.Manager
         private float tickTimer;
         private float spawnTimer;
         private int tickCount = 0;
+        private KernelObject kernelObject; // 목표 지점 오브젝트
 
         public GridManager Grid => gridManager;
         public float TickRate => tickRate;
         public GameRuleType CurrentStage => stageConfigs[currentStageIndex].ruleType;
         public Vector2Int KernelPosition => stageConfigs[currentStageIndex].kernelPosition;
         public Vector2Int PlayerStartPosition => stageConfigs[currentStageIndex].playerStartPosition;
+        public KernelObject Kernel => kernelObject;
 
         void Awake()
         {
@@ -276,6 +278,7 @@ namespace GameOfLife.Manager
             }
 
             ClearGrid();
+            CreateKernel(); // 커널 생성 또는 위치 업데이트
 
             switch (stage)
             {
@@ -297,6 +300,27 @@ namespace GameOfLife.Manager
             }
 
             Debug.Log($"Loaded Stage: {stage}");
+        }
+
+        private void CreateKernel()
+        {
+            Vector2Int kernelGridPos = stageConfigs[currentStageIndex].kernelPosition;
+            Vector3 kernelWorldPos = gridManager.GridToWorldPosition(kernelGridPos.x, kernelGridPos.y);
+
+            if (kernelObject == null)
+            {
+                // 커널 오브젝트 생성
+                GameObject kernelGO = new GameObject("Kernel");
+                kernelGO.transform.parent = transform;
+                kernelObject = kernelGO.AddComponent<KernelObject>();
+
+                // SpriteRenderer 추가 (KernelObject가 자동으로 설정)
+                kernelGO.AddComponent<SpriteRenderer>();
+            }
+
+            // 커널 위치 설정
+            kernelObject.SetPosition(kernelWorldPos);
+            Debug.Log($"Kernel created at grid position {kernelGridPos}, world position {kernelWorldPos}");
         }
 
         private void ClearGrid()
@@ -325,10 +349,6 @@ namespace GameOfLife.Manager
             // 초기 패턴
             SpawnGliderPattern(12, 12);
             SpawnBlinkerPattern(30, 15);
-
-            // 커널 (목표 지점) - stageConfigs에서 읽어옴
-            Vector2Int kernelPos = stageConfigs[currentStageIndex].kernelPosition;
-            gridManager.SetCellAlive(kernelPos.x, kernelPos.y, true, CellType.Kernel);
         }
 
         private void LoadStage2_HighLife()
@@ -345,10 +365,6 @@ namespace GameOfLife.Manager
             // HighLife 특화 패턴
             SpawnReplicatorPattern(10, 12);
             SpawnPulsarPattern(32, 18);
-
-            // 커널 - stageConfigs에서 읽어옴
-            Vector2Int kernelPos = stageConfigs[currentStageIndex].kernelPosition;
-            gridManager.SetCellAlive(kernelPos.x, kernelPos.y, true, CellType.Kernel);
         }
 
         private void LoadStage3_Maze()
@@ -363,10 +379,6 @@ namespace GameOfLife.Manager
                 int y = Random.Range(10, 20);
                 CreateBox(x, y, 3, 3);
             }
-
-            // 커널 - stageConfigs에서 읽어옴
-            Vector2Int kernelPos = stageConfigs[currentStageIndex].kernelPosition;
-            gridManager.SetCellAlive(kernelPos.x, kernelPos.y, true, CellType.Kernel);
         }
 
         private void LoadStage4_DayAndNight()
@@ -380,10 +392,6 @@ namespace GameOfLife.Manager
             // 초기 폭발 지점
             SpawnAcornPattern(25, 15);
             SpawnRPentominoPattern(18, 20);
-
-            // 커널 - stageConfigs에서 읽어옴
-            Vector2Int kernelPos = stageConfigs[currentStageIndex].kernelPosition;
-            gridManager.SetCellAlive(kernelPos.x, kernelPos.y, true, CellType.Kernel);
         }
 
         private void LoadStage5_Seeds()
@@ -397,10 +405,6 @@ namespace GameOfLife.Manager
             // Seeds 패턴 (2개 이웃이면 탄생)
             SpawnBlinkerPattern(15, 15);
             SpawnBlinkerPattern(35, 15);
-
-            // 커널 - stageConfigs에서 읽어옴
-            Vector2Int kernelPos = stageConfigs[currentStageIndex].kernelPosition;
-            gridManager.SetCellAlive(kernelPos.x, kernelPos.y, true, CellType.Kernel);
         }
 
         private void CreateStageBoundary()
