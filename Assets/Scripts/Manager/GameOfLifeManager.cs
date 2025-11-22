@@ -17,25 +17,31 @@ namespace GameOfLife.Manager
         [SerializeField] private float tickRate = 1f; // 틱 속도 (1초 = 1틱/초)
 
         [Header("Stage Settings")]
-        [SerializeField] private GameRuleType currentStage = GameRuleType.ConwayLife;
+        [SerializeField] private int currentStageIndex = 0;
+        [SerializeField] private StageConfig[] stageConfigs = new StageConfig[5]
+        {
+            new StageConfig { ruleType = GameRuleType.ConwayLife, playerStartPosition = new Vector2Int(8, 8), kernelPosition = new Vector2Int(42, 22) },
+            new StageConfig { ruleType = GameRuleType.HighLife, playerStartPosition = new Vector2Int(7, 10), kernelPosition = new Vector2Int(40, 20) },
+            new StageConfig { ruleType = GameRuleType.Maze, playerStartPosition = new Vector2Int(7, 7), kernelPosition = new Vector2Int(43, 23) },
+            new StageConfig { ruleType = GameRuleType.DayAndNight, playerStartPosition = new Vector2Int(15, 15), kernelPosition = new Vector2Int(38, 22) },
+            new StageConfig { ruleType = GameRuleType.Seeds, playerStartPosition = new Vector2Int(25, 22), kernelPosition = new Vector2Int(25, 8) }
+        };
         [SerializeField] private bool spawnInitialPattern = true;
 
         [Header("Auto Spawn Settings")]
-        [SerializeField] private bool autoSpawnPatterns = false; // 스테이지 모드에서는 기본 false
-        [SerializeField] private float spawnInterval = 15f; // 패턴 생성 간격 (초)
+        [SerializeField] private bool autoSpawnPatterns = false;
+        [SerializeField] private float spawnInterval = 15f;
 
         private GridManager gridManager;
         private float tickTimer;
         private float spawnTimer;
         private int tickCount = 0;
-        private Vector2Int kernelPosition; // 목표 지점
-        private Vector2Int playerStartPosition; // 플레이어 시작 위치
 
         public GridManager Grid => gridManager;
         public float TickRate => tickRate;
-        public GameRuleType CurrentStage => currentStage;
-        public Vector2Int KernelPosition => kernelPosition;
-        public Vector2Int PlayerStartPosition => playerStartPosition;
+        public GameRuleType CurrentStage => stageConfigs[currentStageIndex].ruleType;
+        public Vector2Int KernelPosition => stageConfigs[currentStageIndex].kernelPosition;
+        public Vector2Int PlayerStartPosition => stageConfigs[currentStageIndex].playerStartPosition;
 
         void Awake()
         {
@@ -46,7 +52,7 @@ namespace GameOfLife.Manager
         {
             if (spawnInitialPattern)
             {
-                LoadStage(currentStage);
+                LoadStageByIndex(currentStageIndex);
             }
         }
 
@@ -112,7 +118,7 @@ namespace GameOfLife.Manager
                     int liveNeighbors = gridManager.CountLiveNeighbors(x, y);
 
                     // 스테이지별 규칙 적용
-                    switch (currentStage)
+                    switch (stageConfigs[currentStageIndex].ruleType)
                     {
                         case GameRuleType.ConwayLife:
                             ApplyConwayRule(cell, liveNeighbors);
@@ -221,9 +227,30 @@ namespace GameOfLife.Manager
 
         // === 스테이지 로드 시스템 ===
 
+        public void LoadStageByIndex(int stageIndex)
+        {
+            if (stageIndex < 0 || stageIndex >= stageConfigs.Length)
+            {
+                Debug.LogError($"Invalid stage index: {stageIndex}");
+                return;
+            }
+
+            currentStageIndex = stageIndex;
+            LoadStage(stageConfigs[stageIndex].ruleType);
+        }
+
         public void LoadStage(GameRuleType stage)
         {
-            currentStage = stage;
+            // stageConfigs에서 해당 stage의 인덱스를 찾아서 currentStageIndex 설정
+            for (int i = 0; i < stageConfigs.Length; i++)
+            {
+                if (stageConfigs[i].ruleType == stage)
+                {
+                    currentStageIndex = i;
+                    break;
+                }
+            }
+
             ClearGrid();
 
             switch (stage)
@@ -266,9 +293,6 @@ namespace GameOfLife.Manager
             // 스테이지 1: 튜토리얼 - 기본 콘웨이 규칙
             CreateStageBoundary();
 
-            // 플레이어 시작 위치 - 좌하단
-            playerStartPosition = new Vector2Int(8, 8);
-
             // 간단한 미로
             CreateHorizontalPlatform(10, 10, 12);
             CreateHorizontalPlatform(28, 10, 12);
@@ -278,18 +302,15 @@ namespace GameOfLife.Manager
             SpawnGliderPattern(12, 12);
             SpawnBlinkerPattern(30, 15);
 
-            // 커널 (목표 지점) - 우상단
-            kernelPosition = new Vector2Int(42, 22);
-            gridManager.SetCellAlive(kernelPosition.x, kernelPosition.y, true, CellType.Kernel);
+            // 커널 (목표 지점) - stageConfigs에서 읽어옴
+            Vector2Int kernelPos = stageConfigs[currentStageIndex].kernelPosition;
+            gridManager.SetCellAlive(kernelPos.x, kernelPos.y, true, CellType.Kernel);
         }
 
         private void LoadStage2_HighLife()
         {
             // 스테이지 2: HighLife - Replicator 패턴
             CreateStageBoundary();
-
-            // 플레이어 시작 위치
-            playerStartPosition = new Vector2Int(7, 10);
 
             // 복잡한 미로
             CreateHorizontalPlatform(8, 8, 15);
@@ -301,18 +322,15 @@ namespace GameOfLife.Manager
             SpawnReplicatorPattern(10, 12);
             SpawnPulsarPattern(32, 18);
 
-            // 커널
-            kernelPosition = new Vector2Int(40, 20);
-            gridManager.SetCellAlive(kernelPosition.x, kernelPosition.y, true, CellType.Kernel);
+            // 커널 - stageConfigs에서 읽어옴
+            Vector2Int kernelPos = stageConfigs[currentStageIndex].kernelPosition;
+            gridManager.SetCellAlive(kernelPos.x, kernelPos.y, true, CellType.Kernel);
         }
 
         private void LoadStage3_Maze()
         {
             // 스테이지 3: Maze - 미로 생성 규칙
             CreateStageBoundary();
-
-            // 플레이어 시작 위치
-            playerStartPosition = new Vector2Int(7, 7);
 
             // 미로 규칙이 자동으로 미로를 생성하므로 초기 씨앗만 배치
             for (int i = 0; i < 5; i++)
@@ -322,18 +340,15 @@ namespace GameOfLife.Manager
                 CreateBox(x, y, 3, 3);
             }
 
-            // 커널
-            kernelPosition = new Vector2Int(43, 23);
-            gridManager.SetCellAlive(kernelPosition.x, kernelPosition.y, true, CellType.Kernel);
+            // 커널 - stageConfigs에서 읽어옴
+            Vector2Int kernelPos = stageConfigs[currentStageIndex].kernelPosition;
+            gridManager.SetCellAlive(kernelPos.x, kernelPos.y, true, CellType.Kernel);
         }
 
         private void LoadStage4_DayAndNight()
         {
             // 스테이지 4: Day & Night - 매우 활발한 규칙
             CreateStageBoundary();
-
-            // 플레이어 시작 위치 - 안전 지대 중앙
-            playerStartPosition = new Vector2Int(15, 15);
 
             // 안전 지대 (플레이어용)
             CreateBox(12, 12, 6, 6);
@@ -342,18 +357,15 @@ namespace GameOfLife.Manager
             SpawnAcornPattern(25, 15);
             SpawnRPentominoPattern(18, 20);
 
-            // 커널
-            kernelPosition = new Vector2Int(38, 22);
-            gridManager.SetCellAlive(kernelPosition.x, kernelPosition.y, true, CellType.Kernel);
+            // 커널 - stageConfigs에서 읽어옴
+            Vector2Int kernelPos = stageConfigs[currentStageIndex].kernelPosition;
+            gridManager.SetCellAlive(kernelPos.x, kernelPos.y, true, CellType.Kernel);
         }
 
         private void LoadStage5_Seeds()
         {
             // 스테이지 5: Seeds - 폭발형 (최고 난이도)
             CreateStageBoundary();
-
-            // 플레이어 시작 위치
-            playerStartPosition = new Vector2Int(25, 22);
 
             // 플레이어 시작 지점 보호
             CreateBox(23, 20, 4, 4);
@@ -362,9 +374,9 @@ namespace GameOfLife.Manager
             SpawnBlinkerPattern(15, 15);
             SpawnBlinkerPattern(35, 15);
 
-            // 커널
-            kernelPosition = new Vector2Int(25, 8);
-            gridManager.SetCellAlive(kernelPosition.x, kernelPosition.y, true, CellType.Kernel);
+            // 커널 - stageConfigs에서 읽어옴
+            Vector2Int kernelPos = stageConfigs[currentStageIndex].kernelPosition;
+            gridManager.SetCellAlive(kernelPos.x, kernelPos.y, true, CellType.Kernel);
         }
 
         private void CreateStageBoundary()

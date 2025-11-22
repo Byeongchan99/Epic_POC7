@@ -47,4 +47,15 @@ namespace GameOfLife.Core
         DayAndNight,    // 대칭 규칙 (B3678/S34678)
         Seeds           // 폭발형 (B2/S)
     }
+
+    /// <summary>
+    /// 스테이지 설정 정보
+    /// </summary>
+    [System.Serializable]
+    public class StageConfig
+    {
+        public GameRuleType ruleType;
+        public Vector2Int playerStartPosition;
+        public Vector2Int kernelPosition;
+    }
 }
