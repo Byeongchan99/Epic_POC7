@@ -46,6 +46,7 @@ namespace GameOfLife.Manager
         void Awake()
         {
             InitializeGrid();
+            InitializeStageConfigs();
         }
 
         void Start()
@@ -53,6 +54,29 @@ namespace GameOfLife.Manager
             if (spawnInitialPattern)
             {
                 LoadStageByIndex(currentStageIndex);
+            }
+        }
+
+        private void InitializeStageConfigs()
+        {
+            // stageConfigs가 null이거나 비어있으면 기본값으로 초기화
+            if (stageConfigs == null || stageConfigs.Length != 5)
+            {
+                Debug.LogWarning("StageConfigs not properly initialized. Creating default configs.");
+                stageConfigs = new StageConfig[5]
+                {
+                    new StageConfig { ruleType = GameRuleType.ConwayLife, playerStartPosition = new Vector2Int(8, 8), kernelPosition = new Vector2Int(42, 22) },
+                    new StageConfig { ruleType = GameRuleType.HighLife, playerStartPosition = new Vector2Int(7, 10), kernelPosition = new Vector2Int(40, 20) },
+                    new StageConfig { ruleType = GameRuleType.Maze, playerStartPosition = new Vector2Int(7, 7), kernelPosition = new Vector2Int(43, 23) },
+                    new StageConfig { ruleType = GameRuleType.DayAndNight, playerStartPosition = new Vector2Int(15, 15), kernelPosition = new Vector2Int(38, 22) },
+                    new StageConfig { ruleType = GameRuleType.Seeds, playerStartPosition = new Vector2Int(25, 22), kernelPosition = new Vector2Int(25, 8) }
+                };
+            }
+
+            // currentStageIndex가 범위를 벗어나면 0으로 초기화
+            if (currentStageIndex < 0 || currentStageIndex >= stageConfigs.Length)
+            {
+                currentStageIndex = 0;
             }
         }
 
