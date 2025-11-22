@@ -19,8 +19,13 @@ namespace GameOfLife.Manager
         [Header("Initial Pattern")]
         [SerializeField] private bool spawnInitialPattern = true;
 
+        [Header("Auto Spawn Settings")]
+        [SerializeField] private bool autoSpawnPatterns = true; // 자동 패턴 생성 활성화
+        [SerializeField] private float spawnInterval = 15f; // 패턴 생성 간격 (초)
+
         private GridManager gridManager;
         private float tickTimer;
+        private float spawnTimer;
         private int tickCount = 0;
 
         public GridManager Grid => gridManager;
@@ -47,6 +52,17 @@ namespace GameOfLife.Manager
             {
                 tickTimer = 0f;
                 ProcessTick();
+            }
+
+            // 자동 패턴 스폰
+            if (autoSpawnPatterns)
+            {
+                spawnTimer += Time.deltaTime;
+                if (spawnTimer >= spawnInterval)
+                {
+                    spawnTimer = 0f;
+                    SpawnRandomPattern();
+                }
             }
         }
 
@@ -195,9 +211,12 @@ namespace GameOfLife.Manager
             CreateStairs(8, 6, 5, true);  // 왼쪽 올라가는 계단
             CreateStairs(38, 6, 5, false); // 오른쪽 내려가는 계단
 
-            // 추가 장애물 (동적 패턴 생성용)
-            SpawnGliderPattern(centerX - 3, centerY);
-            SpawnBlinkerPattern(centerX + 5, centerY + 3);
+            // 증식 패턴들 (게임을 활성화)
+            SpawnGliderGunPattern(10, 12); // 왼쪽에 Glider Gun
+            SpawnGliderGunPattern(35, 18); // 오른쪽에 Glider Gun
+            SpawnRPentominoPattern(centerX, centerY + 5); // 중앙에 R-pentomino (카오스)
+            SpawnPulsarPattern(15, 8); // Pulsar 진동 패턴
+            SpawnAcornPattern(30, 22); // Acorn 증식 패턴
         }
 
         private void CreateHorizontalPlatform(int startX, int y, int length)
@@ -238,6 +257,131 @@ namespace GameOfLife.Manager
                 {
                     gridManager.SetCellAlive(x, y, true);
                 }
+            }
+        }
+
+        // === 증식/활성 패턴들 ===
+
+        private void SpawnGliderGunPattern(int startX, int startY)
+        {
+            // Gosper's Glider Gun - 무한히 Glider를 생성하는 패턴
+            // 왼쪽 블록
+            gridManager.SetCellAlive(startX, startY, true);
+            gridManager.SetCellAlive(startX, startY + 1, true);
+            gridManager.SetCellAlive(startX + 1, startY, true);
+            gridManager.SetCellAlive(startX + 1, startY + 1, true);
+
+            // 왼쪽 생성기
+            gridManager.SetCellAlive(startX + 10, startY, true);
+            gridManager.SetCellAlive(startX + 10, startY + 1, true);
+            gridManager.SetCellAlive(startX + 10, startY + 2, true);
+            gridManager.SetCellAlive(startX + 11, startY - 1, true);
+            gridManager.SetCellAlive(startX + 11, startY + 3, true);
+            gridManager.SetCellAlive(startX + 12, startY - 2, true);
+            gridManager.SetCellAlive(startX + 13, startY - 2, true);
+            gridManager.SetCellAlive(startX + 12, startY + 4, true);
+            gridManager.SetCellAlive(startX + 13, startY + 4, true);
+            gridManager.SetCellAlive(startX + 14, startY + 1, true);
+            gridManager.SetCellAlive(startX + 15, startY - 1, true);
+            gridManager.SetCellAlive(startX + 15, startY + 3, true);
+            gridManager.SetCellAlive(startX + 16, startY, true);
+            gridManager.SetCellAlive(startX + 16, startY + 1, true);
+            gridManager.SetCellAlive(startX + 16, startY + 2, true);
+            gridManager.SetCellAlive(startX + 17, startY + 1, true);
+
+            // 오른쪽 생성기
+            gridManager.SetCellAlive(startX + 20, startY - 2, true);
+            gridManager.SetCellAlive(startX + 20, startY - 3, true);
+            gridManager.SetCellAlive(startX + 20, startY - 4, true);
+            gridManager.SetCellAlive(startX + 21, startY - 2, true);
+            gridManager.SetCellAlive(startX + 21, startY - 3, true);
+            gridManager.SetCellAlive(startX + 21, startY - 4, true);
+            gridManager.SetCellAlive(startX + 22, startY - 1, true);
+            gridManager.SetCellAlive(startX + 22, startY - 5, true);
+            gridManager.SetCellAlive(startX + 24, startY - 1, true);
+            gridManager.SetCellAlive(startX + 24, startY, true);
+            gridManager.SetCellAlive(startX + 24, startY - 5, true);
+            gridManager.SetCellAlive(startX + 24, startY - 6, true);
+
+            // 오른쪽 블록
+            gridManager.SetCellAlive(startX + 34, startY - 3, true);
+            gridManager.SetCellAlive(startX + 34, startY - 4, true);
+            gridManager.SetCellAlive(startX + 35, startY - 3, true);
+            gridManager.SetCellAlive(startX + 35, startY - 4, true);
+        }
+
+        private void SpawnRPentominoPattern(int startX, int startY)
+        {
+            // R-pentomino - 1103세대 동안 활성화되는 카오스 패턴
+            gridManager.SetCellAlive(startX + 1, startY, true);
+            gridManager.SetCellAlive(startX + 2, startY, true);
+            gridManager.SetCellAlive(startX, startY + 1, true);
+            gridManager.SetCellAlive(startX + 1, startY + 1, true);
+            gridManager.SetCellAlive(startX + 1, startY + 2, true);
+        }
+
+        private void SpawnPulsarPattern(int startX, int startY)
+        {
+            // Pulsar - 주기 3의 진동 패턴
+            int[][] pattern = new int[][]
+            {
+                new int[] {2, 0}, new int[] {3, 0}, new int[] {4, 0}, new int[] {8, 0}, new int[] {9, 0}, new int[] {10, 0},
+                new int[] {0, 2}, new int[] {5, 2}, new int[] {7, 2}, new int[] {12, 2},
+                new int[] {0, 3}, new int[] {5, 3}, new int[] {7, 3}, new int[] {12, 3},
+                new int[] {0, 4}, new int[] {5, 4}, new int[] {7, 4}, new int[] {12, 4},
+                new int[] {2, 5}, new int[] {3, 5}, new int[] {4, 5}, new int[] {8, 5}, new int[] {9, 5}, new int[] {10, 5},
+                new int[] {2, 7}, new int[] {3, 7}, new int[] {4, 7}, new int[] {8, 7}, new int[] {9, 7}, new int[] {10, 7},
+                new int[] {0, 8}, new int[] {5, 8}, new int[] {7, 8}, new int[] {12, 8},
+                new int[] {0, 9}, new int[] {5, 9}, new int[] {7, 9}, new int[] {12, 9},
+                new int[] {0, 10}, new int[] {5, 10}, new int[] {7, 10}, new int[] {12, 10},
+                new int[] {2, 12}, new int[] {3, 12}, new int[] {4, 12}, new int[] {8, 12}, new int[] {9, 12}, new int[] {10, 12}
+            };
+
+            foreach (var pos in pattern)
+            {
+                gridManager.SetCellAlive(startX + pos[0], startY + pos[1], true);
+            }
+        }
+
+        private void SpawnAcornPattern(int startX, int startY)
+        {
+            // Acorn - 5206세대 동안 활성화되며 증식하는 패턴
+            gridManager.SetCellAlive(startX + 1, startY, true);
+            gridManager.SetCellAlive(startX + 3, startY + 1, true);
+            gridManager.SetCellAlive(startX, startY + 2, true);
+            gridManager.SetCellAlive(startX + 1, startY + 2, true);
+            gridManager.SetCellAlive(startX + 4, startY + 2, true);
+            gridManager.SetCellAlive(startX + 5, startY + 2, true);
+            gridManager.SetCellAlive(startX + 6, startY + 2, true);
+        }
+
+        private void SpawnRandomPattern()
+        {
+            // 미로 내부의 랜덤한 위치에 패턴 스폰
+            int x = Random.Range(8, gridWidth - 12);
+            int y = Random.Range(8, gridHeight - 8);
+
+            // 랜덤한 패턴 선택
+            int patternType = Random.Range(0, 4);
+
+            switch (patternType)
+            {
+                case 0:
+                    SpawnGliderPattern(x, y);
+                    Debug.Log($"Spawned Glider at ({x}, {y})");
+                    break;
+                case 1:
+                    SpawnRPentominoPattern(x, y);
+                    Debug.Log($"Spawned R-pentomino at ({x}, {y})");
+                    break;
+                case 2:
+                    SpawnAcornPattern(x, y);
+                    Debug.Log($"Spawned Acorn at ({x}, {y})");
+                    break;
+                case 3:
+                    SpawnPulsarPattern(x, y);
+                    Debug.Log($"Spawned Pulsar at ({x}, {y})");
+                    break;
             }
         }
 
