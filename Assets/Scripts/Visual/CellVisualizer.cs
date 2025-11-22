@@ -31,12 +31,25 @@ namespace GameOfLife.Visual
                 gameManager = FindFirstObjectByType<GameOfLifeManager>();
             }
 
+            if (gameManager == null)
+            {
+                Debug.LogError("CellVisualizer: GameOfLifeManager not found!");
+                return;
+            }
+
+            if (gameManager.Grid == null)
+            {
+                Debug.LogError("CellVisualizer: GameOfLifeManager.Grid is null!");
+                return;
+            }
+
             if (cellPrefab == null)
             {
                 CreateDefaultCellPrefab();
             }
 
             InitializeVisuals();
+            Debug.Log($"CellVisualizer initialized with {gameManager.Grid.Width}x{gameManager.Grid.Height} grid");
         }
 
         void LateUpdate()
@@ -93,7 +106,11 @@ namespace GameOfLife.Visual
 
         private void UpdateVisuals()
         {
+            if (gameManager == null || gameManager.Grid == null || cellRenderers == null)
+                return;
+
             GridManager grid = gameManager.Grid;
+            int aliveCellCount = 0;
 
             for (int x = 0; x < grid.Width; x++)
             {
@@ -106,6 +123,7 @@ namespace GameOfLife.Visual
                     {
                         sr.enabled = true;
                         sr.color = GetColorForCell(cell);
+                        aliveCellCount++;
                     }
                     else if (showPreview && cell.WillBeAlive)
                     {
@@ -118,6 +136,12 @@ namespace GameOfLife.Visual
                         sr.enabled = false;
                     }
                 }
+            }
+
+            // 첫 몇 프레임만 로그 출력
+            if (Time.frameCount % 60 == 0)
+            {
+                Debug.Log($"UpdateVisuals: {aliveCellCount} cells alive");
             }
         }
 
