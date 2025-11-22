@@ -21,8 +21,7 @@
      - Grid Width: 50
      - Grid Height: 50
      - Cell Size: 1
-     - Initial Tick Rate: 1.0
-     - Min Tick Rate: 0.5
+     - Tick Rate: 1.0 (일정한 틱 속도)
 
 3. **=== Object ===** 하위에 새 오브젝트 생성:
    - 이름: `CellVisualizer`
@@ -52,8 +51,8 @@ Unity Input Manager 설정 확인:
 ## 조작법
 
 - **WASD / 화살표 키**: 플레이어 이동
-- **좌클릭 (홀드)**: 세포 삭제 (Delete)
-- **우클릭**: 세포 생성 (Write) - 빈 공간에만 가능
+- **좌클릭 (홀드)**: 총 발사 - 투사체가 날아가 맞은 세포를 파괴
+- **우클릭**: 세포 생성 (Write) - 빈 공간에만 가능, 적의 과밀 유도용
 
 ## 게임 규칙
 
@@ -78,19 +77,22 @@ Assets/Scripts/
 │   ├── Cell.cs              # 세포 데이터 클래스
 │   └── GridManager.cs       # 격자 시스템 관리
 ├── Manager/
-│   └── GameOfLifeManager.cs # 게임 규칙 및 틱 시스템
+│   └── GameOfLifeManager.cs # 게임 규칙, 틱 시스템, 미로 생성
 ├── Visual/
 │   └── CellVisualizer.cs    # 세포 시각화
 └── Player/
-    └── PlayerController.cs  # 플레이어 이동 및 입력
+    ├── PlayerController.cs  # 플레이어 이동, 총 발사
+    └── Projectile.cs        # 투사체 (총알)
 ```
 
-## 초기 패턴
+## 초기 패턴 - 플랫포머 미로
 
-게임 시작 시 자동으로 생성되는 패턴:
-- **Glider** (5, 5): 대각선으로 움직이는 패턴
-- **Blinker** (15, 15): 수직/수평으로 진동하는 패턴
-- **Block** (25, 25): 정적인 패턴
+게임 시작 시 자동으로 생성되는 플랫포머 스타일 미로:
+- **벽과 바닥**: 미로의 외곽 경계
+- **플랫폼들**: 여러 층의 수평 플랫폼
+- **계단**: 좌우에 올라가는/내려가는 계단
+- **중앙 장애물**: 박스 형태의 장애물
+- **동적 패턴**: Glider, Blinker 등이 미로 내부에서 활동
 
 ## 디버깅
 

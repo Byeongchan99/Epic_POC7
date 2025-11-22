@@ -24,7 +24,13 @@ namespace GameOfLife.Player
         [SerializeField] private int maxHealth = 3;
         [SerializeField] private float invincibilityDuration = 1f;
 
+        [Header("Shooting Settings")]
+        [SerializeField] private GameObject projectilePrefab;
+        [SerializeField] private float fireRate = 0.2f; // 발사 간격 (초)
+        [SerializeField] private Transform firePoint; // 총알 발사 위치 (없으면 플레이어 위치)
+
         private SpriteRenderer spriteRenderer;
+        private float lastFireTime = 0f;
         private int currentHealth;
         private float invincibilityTimer = 0f;
         private Vector2Int currentGridPos;
@@ -88,19 +94,80 @@ namespace GameOfLife.Player
             if (gameManager == null || gameManager.Grid == null) return;
 
             Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-            Vector2Int gridPos = gameManager.Grid.WorldToGridPosition(mouseWorldPos);
+            mouseWorldPos.z = 0;
 
-            // 좌클릭: 세포 삭제
+            // 좌클릭: 총 발사
             if (Input.GetMouseButton(0))
             {
-                gameManager.DeleteCell(gridPos.x, gridPos.y);
+                if (Time.time - lastFireTime >= fireRate)
+                {
+                    ShootProjectile(mouseWorldPos);
+                    lastFireTime = Time.time;
+                }
             }
 
             // 우클릭: 세포 생성
             if (Input.GetMouseButtonDown(1))
             {
+                Vector2Int gridPos = gameManager.Grid.WorldToGridPosition(mouseWorldPos);
                 gameManager.PlaceCell(gridPos.x, gridPos.y);
             }
+        }
+
+        private void ShootProjectile(Vector3 targetWorldPos)
+        {
+            if (projectilePrefab == null)
+            {
+                CreateDefaultProjectilePrefab();
+            }
+
+            Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
+            Vector3 direction = (targetWorldPos - spawnPos).normalized;
+
+            GameObject bullet = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
+            Projectile proj = bullet.GetComponent<Projectile>();
+
+            if (proj != null)
+            {
+                proj.Initialize(direction, gameManager);
+            }
+        }
+
+        private void CreateDefaultProjectilePrefab()
+        {
+            // 기본 총알 프리팹 생성
+            projectilePrefab = new GameObject("Projectile");
+
+            SpriteRenderer sr = projectilePrefab.AddComponent<SpriteRenderer>();
+            sr.sprite = CreateCircleSprite();
+            sr.color = Color.yellow;
+
+            projectilePrefab.AddComponent<Projectile>();
+            projectilePrefab.transform.localScale = Vector3.one * 0.2f;
+        }
+
+        private Sprite CreateCircleSprite()
+        {
+            int size = 32;
+            Texture2D tex = new Texture2D(size, size);
+            Color[] pixels = new Color[size * size];
+
+            Vector2 center = new Vector2(size / 2f, size / 2f);
+            float radius = size / 2f;
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float distance = Vector2.Distance(new Vector2(x, y), center);
+                    pixels[y * size + x] = distance <= radius ? Color.white : Color.clear;
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
         }
 
         private void UpdateInvincibility()

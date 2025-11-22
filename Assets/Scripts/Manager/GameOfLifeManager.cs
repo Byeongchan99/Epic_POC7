@@ -14,34 +14,28 @@ namespace GameOfLife.Manager
         [SerializeField] private float cellSize = 1f;
 
         [Header("Tick Settings")]
-        [SerializeField] private float initialTickRate = 1f; // 초반 틱 속도 (1초)
-        [SerializeField] private float minTickRate = 0.5f;   // 최소 틱 속도 (0.5초)
-        [SerializeField] private float tickAcceleration = 0.95f; // 틱 가속 비율
+        [SerializeField] private float tickRate = 1f; // 틱 속도 (1초 = 1틱/초)
 
         [Header("Initial Pattern")]
         [SerializeField] private bool spawnInitialPattern = true;
 
         private GridManager gridManager;
-        private float currentTickRate;
         private float tickTimer;
         private int tickCount = 0;
 
         public GridManager Grid => gridManager;
-        public float CurrentTickRate => currentTickRate;
+        public float TickRate => tickRate;
 
         void Awake()
         {
             InitializeGrid();
-            currentTickRate = initialTickRate;
         }
 
         void Start()
         {
             if (spawnInitialPattern)
             {
-                SpawnGliderPattern(5, 5);
-                SpawnBlinkerPattern(15, 15);
-                SpawnBlockPattern(25, 25);
+                SpawnMazePattern();
             }
         }
 
@@ -49,7 +43,7 @@ namespace GameOfLife.Manager
         {
             tickTimer += Time.deltaTime;
 
-            if (tickTimer >= currentTickRate)
+            if (tickTimer >= tickRate)
             {
                 tickTimer = 0f;
                 ProcessTick();
@@ -73,12 +67,6 @@ namespace GameOfLife.Manager
             ApplyNextState();
 
             tickCount++;
-
-            // 틱 속도 점진적 증가 (선택적)
-            if (currentTickRate > minTickRate)
-            {
-                currentTickRate = Mathf.Max(minTickRate, currentTickRate * tickAcceleration);
-            }
         }
 
         /// <summary>
@@ -169,6 +157,88 @@ namespace GameOfLife.Manager
             gridManager.SetCellAlive(startX + 1, startY, true);
             gridManager.SetCellAlive(startX, startY + 1, true);
             gridManager.SetCellAlive(startX + 1, startY + 1, true);
+        }
+
+        private void SpawnMazePattern()
+        {
+            // 플랫포머 스타일 미로 생성
+            int centerX = gridWidth / 2;
+            int centerY = gridHeight / 2;
+
+            // 바닥 (하단)
+            CreateHorizontalPlatform(5, 5, 40);
+
+            // 왼쪽 벽
+            CreateVerticalWall(5, 5, 20);
+
+            // 오른쪽 벽
+            CreateVerticalWall(44, 5, 20);
+
+            // 상단 벽
+            CreateHorizontalPlatform(5, 24, 40);
+
+            // 플랫폼들
+            CreateHorizontalPlatform(10, 10, 8);
+            CreateHorizontalPlatform(30, 10, 8);
+
+            CreateHorizontalPlatform(15, 15, 10);
+            CreateHorizontalPlatform(28, 15, 10);
+
+            CreateHorizontalPlatform(8, 20, 6);
+            CreateHorizontalPlatform(20, 20, 10);
+            CreateHorizontalPlatform(35, 20, 6);
+
+            // 중앙 장애물
+            CreateBox(22, 8, 6, 3);
+
+            // 좌우 계단식 구조
+            CreateStairs(8, 6, 5, true);  // 왼쪽 올라가는 계단
+            CreateStairs(38, 6, 5, false); // 오른쪽 내려가는 계단
+
+            // 추가 장애물 (동적 패턴 생성용)
+            SpawnGliderPattern(centerX - 3, centerY);
+            SpawnBlinkerPattern(centerX + 5, centerY + 3);
+        }
+
+        private void CreateHorizontalPlatform(int startX, int y, int length)
+        {
+            for (int x = startX; x < startX + length && x < gridWidth; x++)
+            {
+                gridManager.SetCellAlive(x, y, true);
+            }
+        }
+
+        private void CreateVerticalWall(int x, int startY, int height)
+        {
+            for (int y = startY; y < startY + height && y < gridHeight; y++)
+            {
+                gridManager.SetCellAlive(x, y, true);
+            }
+        }
+
+        private void CreateBox(int startX, int startY, int width, int height)
+        {
+            for (int x = startX; x < startX + width && x < gridWidth; x++)
+            {
+                for (int y = startY; y < startY + height && y < gridHeight; y++)
+                {
+                    gridManager.SetCellAlive(x, y, true);
+                }
+            }
+        }
+
+        private void CreateStairs(int startX, int startY, int steps, bool ascending)
+        {
+            for (int i = 0; i < steps; i++)
+            {
+                int x = startX + i;
+                int y = ascending ? startY + i : startY + (steps - i - 1);
+
+                if (x < gridWidth && y < gridHeight)
+                {
+                    gridManager.SetCellAlive(x, y, true);
+                }
+            }
         }
 
         // === 플레이어 조작 메서드 ===
