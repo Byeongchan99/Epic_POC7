@@ -97,6 +97,10 @@ namespace GameOfLife.Visual
                     GameObject cellObj = Instantiate(cellPrefab, worldPos, Quaternion.identity, transform);
                     cellObj.name = $"Cell_{x}_{y}";
 
+                    // Instantiate된 오브젝트는 Hierarchy에 보이도록 설정
+                    cellObj.hideFlags = HideFlags.None;
+                    cellObj.SetActive(true);
+
                     SpriteRenderer sr = cellObj.GetComponent<SpriteRenderer>();
                     cellRenderers[x, y] = sr;
                     sr.enabled = false; // 초기에는 비활성화
