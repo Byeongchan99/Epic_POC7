@@ -12,7 +12,7 @@ namespace GameOfLife.Player
     {
         [Header("References")]
         [SerializeField] private GameOfLifeManager gameManager;
-        [SerializeField] private Camera mainCamera;
+        [SerializeField] private UnityEngine.Camera mainCamera;
 
         [Header("Movement Settings")]
         [SerializeField] private float moveSpeed = 5f;
@@ -54,7 +54,7 @@ namespace GameOfLife.Player
 
             if (mainCamera == null)
             {
-                mainCamera = Camera.main;
+                mainCamera = UnityEngine.Camera.main;
             }
 
             // 플레이어를 스테이지 시작 위치에 배치
