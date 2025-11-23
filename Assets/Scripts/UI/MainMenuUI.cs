@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using GameOfLife.Manager;
 using GameOfLife.Core;
+using GameOfLife.Player;
 
 namespace GameOfLife.UI
 {
@@ -79,7 +80,21 @@ namespace GameOfLife.UI
             }
 
             Debug.Log($"Starting stage {stageIndex + 1}");
+
+            // 스테이지 로드
             gameManager.LoadStageByIndex(stageIndex);
+
+            // 플레이어 상태 초기화 (위치, 체력 등)
+            PlayerController player = FindFirstObjectByType<PlayerController>();
+            if (player != null)
+            {
+                player.ResetPlayerState();
+            }
+            else
+            {
+                Debug.LogWarning("PlayerController not found!");
+            }
+
             HideMenu();
 
             // 게임 시작

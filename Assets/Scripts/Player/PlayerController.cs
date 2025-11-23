@@ -106,6 +106,28 @@ namespace GameOfLife.Player
             }
         }
 
+        /// <summary>
+        /// 플레이어 상태를 초기화합니다 (위치, 체력 등)
+        /// </summary>
+        public void ResetPlayerState()
+        {
+            if (gameManager == null || gameManager.Grid == null)
+            {
+                Debug.LogWarning("Cannot reset player state: GameManager or Grid is null");
+                return;
+            }
+
+            // 체력 복구
+            currentHealth = maxHealth;
+            invincibilityTimer = 0f;
+
+            // 플레이어 위치를 스테이지 시작 위치로 설정
+            Vector2Int startGridPos = gameManager.PlayerStartPosition;
+            transform.position = gameManager.Grid.GridToWorldPosition(startGridPos.x, startGridPos.y);
+
+            Debug.Log($"Player state reset. Position: {startGridPos}, Health: {currentHealth}/{maxHealth}");
+        }
+
         private void LoadStage(GameRuleType stage)
         {
             if (gameManager == null) return;
@@ -113,18 +135,13 @@ namespace GameOfLife.Player
             // 타임스케일 정상화
             Time.timeScale = 1f;
 
-            // 체력 복구
-            currentHealth = maxHealth;
-            invincibilityTimer = 0f;
-
             // 스테이지 로드
             gameManager.LoadStage(stage);
 
-            // 플레이어 위치를 스테이지 시작 위치로 설정
-            Vector2Int startGridPos = gameManager.PlayerStartPosition;
-            transform.position = gameManager.Grid.GridToWorldPosition(startGridPos.x, startGridPos.y);
+            // 플레이어 상태 초기화
+            ResetPlayerState();
 
-            Debug.Log($"Switched to Stage: {stage} at position {startGridPos}");
+            Debug.Log($"Switched to Stage: {stage}");
         }
 
         private void HandleMovement()
@@ -182,8 +199,11 @@ namespace GameOfLife.Player
             Vector3 direction = (targetWorldPos - spawnPos).normalized;
 
             GameObject bullet = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
-            Projectile proj = bullet.GetComponent<Projectile>();
+            bullet.name = "Projectile"; // Instantiate된 오브젝트 이름 설정
+            bullet.SetActive(true); // 활성화
+            bullet.hideFlags = HideFlags.None; // Hierarchy에 표시
 
+            Projectile proj = bullet.GetComponent<Projectile>();
             if (proj != null)
             {
                 proj.Initialize(direction, gameManager);
@@ -192,8 +212,8 @@ namespace GameOfLife.Player
 
         private void CreateDefaultProjectilePrefab()
         {
-            // 기본 총알 프리팹 생성
-            projectilePrefab = new GameObject("Projectile");
+            // 기본 총알 프리팹 생성 (템플릿)
+            projectilePrefab = new GameObject("ProjectilePrefab");
 
             SpriteRenderer sr = projectilePrefab.AddComponent<SpriteRenderer>();
             sr.sprite = CreateCircleSprite();
@@ -201,6 +221,12 @@ namespace GameOfLife.Player
 
             projectilePrefab.AddComponent<Projectile>();
             projectilePrefab.transform.localScale = Vector3.one * 0.2f;
+
+            // 템플릿 프리팹은 Hierarchy에서 숨기고 비활성화
+            projectilePrefab.hideFlags = HideFlags.HideInHierarchy;
+            projectilePrefab.SetActive(false);
+
+            Debug.Log("Default projectile prefab created");
         }
 
         private Sprite CreateCircleSprite()
