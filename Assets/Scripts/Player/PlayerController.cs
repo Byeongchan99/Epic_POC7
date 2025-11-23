@@ -1,6 +1,7 @@
 using UnityEngine;
 using GameOfLife.Manager;
 using GameOfLife.Core;
+using GameOfLife.UI;
 
 namespace GameOfLife.Player
 {
@@ -259,19 +260,55 @@ namespace GameOfLife.Player
                 }
             }
 
-            // 적 세포와 충돌 시 데미지
-            Cell playerCell = gameManager.Grid.GetCell(currentGridPos.x, currentGridPos.y);
-            if (playerCell != null && !IsInvincible && playerCell.IsAlive && playerCell.Type == CellType.Enemy)
+            // 적 세포와 충돌 시 데미지 (개선된 판정)
+            // 플레이어 주변 3x3 그리드 영역의 셀들을 체크
+            if (!IsInvincible)
             {
-                TakeDamage();
+                for (int offsetX = -1; offsetX <= 1; offsetX++)
+                {
+                    for (int offsetY = -1; offsetY <= 1; offsetY++)
+                    {
+                        int checkX = currentGridPos.x + offsetX;
+                        int checkY = currentGridPos.y + offsetY;
+
+                        // 그리드 범위 체크
+                        if (!gameManager.Grid.IsInBounds(checkX, checkY))
+                            continue;
+
+                        Cell cell = gameManager.Grid.GetCell(checkX, checkY);
+                        if (cell != null && cell.IsAlive && cell.Type == CellType.Enemy)
+                        {
+                            // 실제 거리 기반 충돌 판정
+                            Vector3 cellWorldPos = gameManager.Grid.GridToWorldPosition(checkX, checkY);
+                            float distance = Vector3.Distance(transform.position, cellWorldPos);
+
+                            // 0.4 유닛 이내면 충돌로 판정 (셀 크기의 절반보다 약간 작게)
+                            if (distance < 0.4f)
+                            {
+                                TakeDamage();
+                                return; // 한 번만 데미지
+                            }
+                        }
+                    }
+                }
             }
         }
 
         private void StageClear()
         {
             Debug.Log("Stage Clear!");
-            // TODO: 다음 스테이지 로드 또는 클리어 UI 표시
-            Time.timeScale = 0f; // 일시 정지
+
+            // 메인 메뉴 표시
+            MainMenuUI mainMenu = FindFirstObjectByType<MainMenuUI>();
+            if (mainMenu != null)
+            {
+                mainMenu.ShowMenu();
+            }
+            else
+            {
+                Debug.LogWarning("MainMenuUI not found!");
+                Time.timeScale = 0f; // 일시 정지
+            }
         }
 
         private void TakeDamage()
@@ -290,8 +327,18 @@ namespace GameOfLife.Player
         private void GameOver()
         {
             Debug.Log("Game Over!");
-            // TODO: 게임 오버 처리
-            Time.timeScale = 0f; // 게임 일시 정지
+
+            // 메인 메뉴 표시
+            MainMenuUI mainMenu = FindFirstObjectByType<MainMenuUI>();
+            if (mainMenu != null)
+            {
+                mainMenu.ShowMenu();
+            }
+            else
+            {
+                Debug.LogWarning("MainMenuUI not found!");
+                Time.timeScale = 0f; // 게임 일시 정지
+            }
         }
 
         void OnDrawGizmos()
