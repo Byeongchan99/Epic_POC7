@@ -33,6 +33,8 @@ public class StageEditorWindow : EditorWindow
 
     private void OnEnable()
     {
+        // 중복 등록 방지: 먼저 해제한 후 등록
+        SceneView.duringSceneGui -= OnSceneGUI;
         SceneView.duringSceneGui += OnSceneGUI;
         FindManagers();
     }
@@ -118,6 +120,12 @@ public class StageEditorWindow : EditorWindow
         }
 
         EditorGUI.EndDisabledGroup();
+
+        // Clear Scene View button (always available)
+        if (GUILayout.Button("Clear Scene View Only"))
+        {
+            ClearSceneView();
+        }
 
         EditorGUILayout.Space();
 
@@ -516,6 +524,25 @@ public class StageEditorWindow : EditorWindow
             else
             {
                 Debug.Log("Cleared stage data");
+            }
+        }
+    }
+
+    private void ClearSceneView()
+    {
+        if (EditorUtility.DisplayDialog("Clear Scene View",
+            "Clear all cells from Scene View?\nStage Data will NOT be affected.",
+            "Yes", "No"))
+        {
+            if (gameManager != null && gameManager.Grid != null)
+            {
+                gameManager.Grid.ClearGrid();
+                SceneView.RepaintAll();
+                Debug.Log("Cleared Scene View (Stage Data unchanged)");
+            }
+            else
+            {
+                Debug.LogWarning("GameOfLifeManager or Grid not found!");
             }
         }
     }
