@@ -809,7 +809,7 @@ namespace GameOfLife.Manager
         }
 
         /// <summary>
-        /// StageData를 불러와서 현재 그리드에 적용
+        /// StageData를 불러와서 현재 그리드에 적용 (경계는 포함하지 않음 - StageData에 직접 포함시켜야 함)
         /// </summary>
         public void LoadStageDataToGrid(StageData stageData)
         {
@@ -818,12 +818,6 @@ namespace GameOfLife.Manager
                 Debug.LogWarning("StageData is null!");
                 return;
             }
-
-            // 그리드 초기화
-            gridManager.ClearGrid();
-
-            // 외곽 경계 생성
-            CreateStageBoundary();
 
             // Permanent 셀 배치
             foreach (var cellData in stageData.permanentCells)
