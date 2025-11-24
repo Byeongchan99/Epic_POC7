@@ -760,10 +760,13 @@ namespace GameOfLife.Manager
         }
 
         /// <summary>
-        /// 코어 파괴 시 주변 일반 셀 제거
+        /// 코어 파괴 시 코어 자체와 주변 일반 셀 제거
         /// </summary>
         public void DestroyCoreAndSurroundingCells(int coreX, int coreY, int radius = 10)
         {
+            // 먼저 코어 자체를 파괴
+            gridManager.SetCellAlive(coreX, coreY, false);
+
             // 반경 내 모든 Normal 셀 제거
             for (int x = coreX - radius; x <= coreX + radius; x++)
             {
