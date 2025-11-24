@@ -205,8 +205,10 @@ public class StageEditorWindow : EditorWindow
 
         HandleMouseInput();
 
-        // Repaint scene view
-        if (Event.current.type == EventType.MouseDown)
+        // Repaint scene view when interacting
+        if (Event.current.type == EventType.MouseDown ||
+            Event.current.type == EventType.MouseDrag ||
+            Event.current.type == EventType.MouseUp)
         {
             SceneView.RepaintAll();
         }
@@ -388,8 +390,7 @@ public class StageEditorWindow : EditorWindow
                     }
                 }
             }
-
-            SceneView.RepaintAll();
+            // Scene View repaint는 OnSceneGUI에서 처리됨
         }
     }
 
@@ -431,6 +432,7 @@ public class StageEditorWindow : EditorWindow
 
         if (cell != null && cell.IsAlive)
         {
+            CellType removedType = cell.Type;
             gameManager.Grid.SetCellAlive(x, y, false);
 
             if (currentStageData != null)
@@ -446,7 +448,15 @@ public class StageEditorWindow : EditorWindow
                 EditorUtility.SetDirty(currentStageData);
             }
 
-            Debug.Log($"Removed cell at ({x}, {y})");
+            // 지워진 셀 타입에 따라 로그
+            string typeString = removedType switch
+            {
+                CellType.Permanent => "Permanent",
+                CellType.Core => "Core",
+                CellType.Normal => "Normal",
+                _ => "Unknown"
+            };
+            Debug.Log($"Removed {typeString} cell at ({x}, {y})");
         }
     }
 
