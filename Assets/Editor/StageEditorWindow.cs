@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 using GameOfLife;
 using GameOfLife.Core;
 using GameOfLife.Manager;
