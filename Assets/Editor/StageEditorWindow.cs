@@ -136,10 +136,24 @@ public class StageEditorWindow : EditorWindow
 
     private void OnSceneGUI(SceneView sceneView)
     {
+        // Play Mode에서는 동작하지 않음
+        if (EditorApplication.isPlaying)
+            return;
+
         if (gameManager == null || gameManager.Grid == null)
         {
             FindManagers();
-            return;
+            if (gameManager == null)
+            {
+                // GameOfLifeManager를 찾지 못하면 Scene View에 경고 표시
+                Handles.BeginGUI();
+                GUILayout.BeginArea(new Rect(10, 10, 300, 100));
+                GUILayout.Label("GameOfLifeManager not found in scene!", EditorStyles.boldLabel);
+                GUILayout.Label("Please open a scene with GameOfLifeManager.");
+                GUILayout.EndArea();
+                Handles.EndGUI();
+                return;
+            }
         }
 
         // Draw grid
@@ -148,11 +162,17 @@ public class StageEditorWindow : EditorWindow
             DrawGrid();
         }
 
-        // Handle mouse input
+        // Handle mouse input - 이벤트를 먼저 캡처
+        int controlID = GUIUtility.GetControlID(FocusType.Passive);
+        HandleUtility.AddDefaultControl(controlID);
+
         HandleMouseInput();
 
         // Repaint scene view
-        SceneView.RepaintAll();
+        if (Event.current.type == EventType.MouseDown)
+        {
+            SceneView.RepaintAll();
+        }
     }
 
     private void DrawGrid()
@@ -183,14 +203,37 @@ public class StageEditorWindow : EditorWindow
     {
         Event e = Event.current;
 
+        // Layout 단계에서는 처리하지 않음
+        if (e.type == EventType.Layout)
+            return;
+
+        // 마우스 다운 이벤트만 처리
         if (e.type == EventType.MouseDown && e.button == 0)
         {
+            // Scene View의 카메라를 통해 월드 좌표 얻기
             Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
-            Vector3 worldPos = ray.origin;
 
-            // Convert to grid coordinates
+            // Z=0 평면과의 교차점 계산 (2D 게임이므로)
+            float enter = 0.0f;
+            Plane groundPlane = new Plane(Vector3.forward, Vector3.zero);
+
+            Vector3 worldPos;
+            if (groundPlane.Raycast(ray, out enter))
+            {
+                worldPos = ray.GetPoint(enter);
+            }
+            else
+            {
+                // Plane과 교차하지 않으면 ray origin 사용
+                worldPos = ray.origin;
+                worldPos.z = 0;
+            }
+
+            // 그리드 좌표로 변환
             int gridX = Mathf.RoundToInt(worldPos.x);
             int gridY = Mathf.RoundToInt(worldPos.y);
+
+            Debug.Log($"Clicked at world: {worldPos}, grid: ({gridX}, {gridY})");
 
             if (gameManager.Grid.IsInBounds(gridX, gridY))
             {
@@ -206,6 +249,11 @@ public class StageEditorWindow : EditorWindow
                 }
 
                 e.Use();
+                SceneView.RepaintAll();
+            }
+            else
+            {
+                Debug.LogWarning($"Grid position ({gridX}, {gridY}) is out of bounds!");
             }
         }
     }
