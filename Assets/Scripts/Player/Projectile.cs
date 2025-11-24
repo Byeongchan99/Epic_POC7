@@ -60,15 +60,18 @@ namespace GameOfLife.Player
                         Cell cell = gameManager.Grid.GetCell(x, y);
                         if (cell != null && cell.IsAlive)
                         {
-                            // Permanent 셀은 파괴 불가
-                            if (cell.Type == CellType.Permanent)
-                                continue;
-
                             Vector3 cellWorldPos = gameManager.Grid.GridToWorldPosition(x, y);
                             float distance = Vector3.Distance(transform.position, cellWorldPos);
 
                             if (distance <= damageRadius)
                             {
+                                // Permanent 셀은 파괴 불가, 하지만 총알은 파괴됨
+                                if (cell.Type == CellType.Permanent)
+                                {
+                                    Destroy(gameObject);
+                                    return;
+                                }
+
                                 // 코어 파괴 시 주변 셀 연쇄 파괴
                                 if (cell.Type == CellType.Core)
                                 {
