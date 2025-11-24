@@ -8,7 +8,6 @@ public class StageEditorWindow : EditorWindow
 {
     private StageData currentStageData;
     private GameOfLifeManager gameManager;
-    private GridManager gridManager;
 
     // Placement settings
     private enum PlacementMode { Permanent, Core, Erase }
@@ -41,8 +40,7 @@ public class StageEditorWindow : EditorWindow
 
     private void FindManagers()
     {
-        gameManager = FindObjectOfType<GameOfLifeManager>();
-        gridManager = FindObjectOfType<GridManager>();
+        gameManager = Object.FindFirstObjectByType<GameOfLifeManager>();
     }
 
     private void OnGUI()
@@ -122,7 +120,7 @@ public class StageEditorWindow : EditorWindow
         EditorGUILayout.HelpBox(
             "Left Click: Place cell/core\n" +
             "Shift + Left Click: Remove cell/core\n" +
-            "Make sure GameOfLifeManager and GridManager are in the scene",
+            "Make sure GameOfLifeManager is in the scene",
             MessageType.Info
         );
 
@@ -138,7 +136,7 @@ public class StageEditorWindow : EditorWindow
 
     private void OnSceneGUI(SceneView sceneView)
     {
-        if (gridManager == null || gameManager == null)
+        if (gameManager == null || gameManager.Grid == null)
         {
             FindManagers();
             return;
@@ -161,8 +159,8 @@ public class StageEditorWindow : EditorWindow
     {
         Handles.color = gridColor;
 
-        int gridWidth = gridManager.GridWidth;
-        int gridHeight = gridManager.GridHeight;
+        int gridWidth = gameManager.Grid.Width;
+        int gridHeight = gameManager.Grid.Height;
 
         // Draw vertical lines
         for (int x = 0; x <= gridWidth; x++)
@@ -194,7 +192,7 @@ public class StageEditorWindow : EditorWindow
             int gridX = Mathf.RoundToInt(worldPos.x);
             int gridY = Mathf.RoundToInt(worldPos.y);
 
-            if (gridManager.IsInBounds(gridX, gridY))
+            if (gameManager.Grid.IsInBounds(gridX, gridY))
             {
                 if (e.shift)
                 {
@@ -217,7 +215,7 @@ public class StageEditorWindow : EditorWindow
         switch (currentMode)
         {
             case PlacementMode.Permanent:
-                gridManager.SetCellAlive(x, y, true, CellType.Permanent);
+                gameManager.Grid.SetCellAlive(x, y, true, CellType.Permanent);
                 if (currentStageData != null)
                 {
                     currentStageData.AddPermanentCell(new Vector2Int(x, y));
@@ -246,11 +244,11 @@ public class StageEditorWindow : EditorWindow
 
     private void RemoveCellAt(int x, int y)
     {
-        Cell cell = gridManager.GetCell(x, y);
+        Cell cell = gameManager.Grid.GetCell(x, y);
 
         if (cell != null && cell.IsAlive)
         {
-            gridManager.SetCellAlive(x, y, false);
+            gameManager.Grid.SetCellAlive(x, y, false);
 
             if (currentStageData != null)
             {
@@ -300,11 +298,11 @@ public class StageEditorWindow : EditorWindow
         currentStageData.Clear();
 
         // Save all cells from the grid
-        for (int x = 0; x < gridManager.GridWidth; x++)
+        for (int x = 0; x < gameManager.Grid.Width; x++)
         {
-            for (int y = 0; y < gridManager.GridHeight; y++)
+            for (int y = 0; y < gameManager.Grid.Height; y++)
             {
-                Cell cell = gridManager.GetCell(x, y);
+                Cell cell = gameManager.Grid.GetCell(x, y);
                 if (cell != null && cell.IsAlive)
                 {
                     if (cell.Type == CellType.Permanent)
@@ -334,19 +332,19 @@ public class StageEditorWindow : EditorWindow
             return;
         }
 
-        if (gameManager == null || gridManager == null)
+        if (gameManager == null || gameManager.Grid == null)
         {
-            Debug.LogWarning("GameOfLifeManager or GridManager not found!");
+            Debug.LogWarning("GameOfLifeManager not found!");
             return;
         }
 
         // Clear current grid
-        gridManager.ClearGrid();
+        gameManager.Grid.ClearGrid();
 
         // Load permanent cells
         foreach (var cellData in currentStageData.permanentCells)
         {
-            gridManager.SetCellAlive(cellData.position.x, cellData.position.y, true, CellType.Permanent);
+            gameManager.Grid.SetCellAlive(cellData.position.x, cellData.position.y, true, CellType.Permanent);
         }
 
         // Load core clusters

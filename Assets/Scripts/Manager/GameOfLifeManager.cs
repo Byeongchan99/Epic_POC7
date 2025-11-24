@@ -709,7 +709,7 @@ namespace GameOfLife.Manager
         /// <summary>
         /// 클러스터를 생성합니다 (코어 + 주변 일반 셀)
         /// </summary>
-        private void CreateCluster(ClusterConfig config)
+        public void CreateCluster(ClusterConfig config)
         {
             if (config == null) return;
 
