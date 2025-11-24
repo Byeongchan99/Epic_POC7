@@ -110,6 +110,17 @@ namespace GameOfLife.Manager
         }
 
         /// <summary>
+        /// 에디터에서 Grid를 초기화합니다.
+        /// </summary>
+        public void InitializeGridForEditor()
+        {
+            if (gridManager == null)
+            {
+                InitializeGrid();
+            }
+        }
+
+        /// <summary>
         /// 한 틱을 처리합니다. (콘웨이의 생명 게임 규칙 적용)
         /// </summary>
         private void ProcessTick()

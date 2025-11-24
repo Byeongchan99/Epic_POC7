@@ -140,20 +140,31 @@ public class StageEditorWindow : EditorWindow
         if (EditorApplication.isPlaying)
             return;
 
-        if (gameManager == null || gameManager.Grid == null)
+        // GameOfLifeManager와 Grid 확인
+        if (gameManager == null)
         {
             FindManagers();
-            if (gameManager == null)
-            {
-                // GameOfLifeManager를 찾지 못하면 Scene View에 경고 표시
-                Handles.BeginGUI();
-                GUILayout.BeginArea(new Rect(10, 10, 300, 100));
-                GUILayout.Label("GameOfLifeManager not found in scene!", EditorStyles.boldLabel);
-                GUILayout.Label("Please open a scene with GameOfLifeManager.");
-                GUILayout.EndArea();
-                Handles.EndGUI();
-                return;
-            }
+        }
+
+        // Manager가 없으면 경고 표시하고 종료
+        if (gameManager == null)
+        {
+            Handles.BeginGUI();
+            GUILayout.BeginArea(new Rect(10, 10, 400, 100));
+            GUILayout.Label("GameOfLifeManager not found!", EditorStyles.boldLabel);
+            GUILayout.Label("Please:");
+            GUILayout.Label("1. Open a scene with GameOfLifeManager");
+            GUILayout.Label("2. Make sure you're in Edit Mode (not Play Mode)");
+            GUILayout.EndArea();
+            Handles.EndGUI();
+            return;
+        }
+
+        // Grid가 초기화되지 않았으면 초기화
+        if (gameManager.Grid == null)
+        {
+            gameManager.InitializeGridForEditor();
+            Debug.Log("Grid initialized for editor");
         }
 
         // Draw grid
