@@ -17,6 +17,10 @@ public class StageEditorWindow : EditorWindow
     private int coreRadius = 5;
     private int coreNormalCellCount = 20;
 
+    // Drag painting
+    private bool isDragging = false;
+    private HashSet<Vector2Int> paintedCellsThisDrag = new HashSet<Vector2Int>();
+
     // Grid visualization
     private bool showGrid = true;
     private bool showCells = true;
@@ -132,7 +136,9 @@ public class StageEditorWindow : EditorWindow
         // Instructions
         EditorGUILayout.HelpBox(
             "Left Click: Place cell/core\n" +
+            "Left Click + Drag: Paint cells (Permanent mode only)\n" +
             "Shift + Left Click: Remove cell/core\n" +
+            "Shift + Drag: Erase cells\n" +
             "Make sure GameOfLifeManager is in the scene",
             MessageType.Info
         );
@@ -293,54 +299,96 @@ public class StageEditorWindow : EditorWindow
         if (e.type == EventType.Layout)
             return;
 
-        // 마우스 다운 이벤트만 처리
+        // 마우스 다운 이벤트 - 드래그 시작
         if (e.type == EventType.MouseDown && e.button == 0)
         {
-            // Scene View의 카메라를 통해 월드 좌표 얻기
-            Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
-
-            // Z=0 평면과의 교차점 계산 (2D 게임이므로)
-            float enter = 0.0f;
-            Plane groundPlane = new Plane(Vector3.forward, Vector3.zero);
-
-            Vector3 worldPos;
-            if (groundPlane.Raycast(ray, out enter))
+            isDragging = true;
+            paintedCellsThisDrag.Clear();
+            ProcessMousePosition(e);
+            e.Use();
+        }
+        // 마우스 드래그 이벤트 - 계속 그리기
+        else if (e.type == EventType.MouseDrag && e.button == 0)
+        {
+            if (isDragging)
             {
-                worldPos = ray.GetPoint(enter);
-            }
-            else
-            {
-                // Plane과 교차하지 않으면 ray origin 사용
-                worldPos = ray.origin;
-                worldPos.z = 0;
-            }
-
-            // 그리드 좌표로 변환
-            int gridX = Mathf.RoundToInt(worldPos.x);
-            int gridY = Mathf.RoundToInt(worldPos.y);
-
-            Debug.Log($"Clicked at world: {worldPos}, grid: ({gridX}, {gridY})");
-
-            if (gameManager.Grid.IsInBounds(gridX, gridY))
-            {
-                if (e.shift)
-                {
-                    // Erase mode
-                    RemoveCellAt(gridX, gridY);
-                }
-                else
-                {
-                    // Place mode
-                    PlaceCellAt(gridX, gridY);
-                }
-
+                ProcessMousePosition(e);
                 e.Use();
-                SceneView.RepaintAll();
+            }
+        }
+        // 마우스 업 이벤트 - 드래그 종료
+        else if (e.type == EventType.MouseUp && e.button == 0)
+        {
+            if (isDragging)
+            {
+                isDragging = false;
+                paintedCellsThisDrag.Clear();
+                Debug.Log("Drag painting completed");
+                e.Use();
+            }
+        }
+    }
+
+    private void ProcessMousePosition(Event e)
+    {
+        // Scene View의 카메라를 통해 월드 좌표 얻기
+        Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+
+        // Z=0 평면과의 교차점 계산 (2D 게임이므로)
+        float enter = 0.0f;
+        Plane groundPlane = new Plane(Vector3.forward, Vector3.zero);
+
+        Vector3 worldPos;
+        if (groundPlane.Raycast(ray, out enter))
+        {
+            worldPos = ray.GetPoint(enter);
+        }
+        else
+        {
+            // Plane과 교차하지 않으면 ray origin 사용
+            worldPos = ray.origin;
+            worldPos.z = 0;
+        }
+
+        // 그리드 좌표로 변환
+        int gridX = Mathf.RoundToInt(worldPos.x);
+        int gridY = Mathf.RoundToInt(worldPos.y);
+
+        if (gameManager.Grid.IsInBounds(gridX, gridY))
+        {
+            Vector2Int gridPos = new Vector2Int(gridX, gridY);
+
+            // 이미 이번 드래그에서 처리한 위치는 스킵
+            if (paintedCellsThisDrag.Contains(gridPos))
+            {
+                return;
+            }
+
+            if (e.shift)
+            {
+                // Erase mode - 드래그로 연속 지우기 가능
+                RemoveCellAt(gridX, gridY);
+                paintedCellsThisDrag.Add(gridPos);
             }
             else
             {
-                Debug.LogWarning($"Grid position ({gridX}, {gridY}) is out of bounds!");
+                // Place mode
+                if (currentMode == PlacementMode.Permanent)
+                {
+                    PlaceCellAt(gridX, gridY);
+                    paintedCellsThisDrag.Add(gridPos);
+                }
+                else if (currentMode == PlacementMode.Core)
+                {
+                    // Core는 드래그로 여러 개 배치하지 않음 (클릭만)
+                    if (e.type == EventType.MouseDown)
+                    {
+                        PlaceCellAt(gridX, gridY);
+                    }
+                }
             }
+
+            SceneView.RepaintAll();
         }
     }
 
@@ -374,9 +422,6 @@ public class StageEditorWindow : EditorWindow
                 Debug.Log($"Placed Core cluster at ({x}, {y}) with radius {coreRadius}");
                 break;
         }
-
-        // Force repaint to show changes immediately
-        SceneView.RepaintAll();
     }
 
     private void RemoveCellAt(int x, int y)
@@ -401,9 +446,6 @@ public class StageEditorWindow : EditorWindow
             }
 
             Debug.Log($"Removed cell at ({x}, {y})");
-
-            // Force repaint to show changes immediately
-            SceneView.RepaintAll();
         }
     }
 
