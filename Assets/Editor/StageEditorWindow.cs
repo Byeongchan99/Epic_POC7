@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEditor;
 using GameOfLife;
+using GameOfLife.Core;
+using GameOfLife.Manager;
 
 public class StageEditorWindow : EditorWindow
 {
