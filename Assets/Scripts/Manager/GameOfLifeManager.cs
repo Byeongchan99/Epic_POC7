@@ -341,15 +341,15 @@ namespace GameOfLife.Manager
             // 스테이지 1: 튜토리얼 - 기본 콘웨이 규칙 (B3/S23)
             CreateStageBoundary();
 
-            // 간단한 맵 구조 (Permanent 벽)
-            CreateHorizontalPlatform(10, 12, 10);
-            CreateHorizontalPlatform(30, 12, 10);
-            CreateVerticalWall(20, 8, 10);
+            // 간단한 맵 구조 (Permanent 벽) - 간격을 넓게
+            CreateHorizontalPlatform(10, 12, 6);
+            CreateHorizontalPlatform(34, 12, 6);
+            CreateVerticalWall(25, 8, 6);
 
             // 코어 클러스터 배치 (3개 - 튜토리얼)
             CreateCluster(new ClusterConfig { corePosition = new Vector2Int(15, 15), normalCellRadius = 4, normalCellCount = 15 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(25, 10), normalCellRadius = 4, normalCellCount = 15 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(35, 18), normalCellRadius = 4, normalCellCount = 15 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(30, 10), normalCellRadius = 4, normalCellCount = 15 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(37, 18), normalCellRadius = 4, normalCellCount = 15 });
         }
 
         private void LoadStage2_HighLife()
@@ -357,18 +357,17 @@ namespace GameOfLife.Manager
             // 스테이지 2: HighLife - Replicator 패턴 (B36/S23)
             CreateStageBoundary();
 
-            // 미로형 맵 구조 (Permanent 벽)
-            CreateHorizontalPlatform(10, 10, 12);
-            CreateHorizontalPlatform(28, 10, 12);
-            CreateVerticalWall(15, 8, 8);
-            CreateVerticalWall(35, 12, 8);
-            CreateBox(20, 15, 6, 4);
+            // 미로형 맵 구조 (Permanent 벽) - 간격을 넓게
+            CreateHorizontalPlatform(10, 10, 8);
+            CreateHorizontalPlatform(32, 10, 8);
+            CreateVerticalWall(20, 8, 5);
+            CreateBox(26, 16, 4, 3);
 
             // 코어 클러스터 배치 (4개)
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(12, 15), normalCellRadius = 5, normalCellCount = 20 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(25, 8), normalCellRadius = 5, normalCellCount = 20 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(32, 16), normalCellRadius = 5, normalCellCount = 20 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(38, 10), normalCellRadius = 5, normalCellCount = 20 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(13, 15), normalCellRadius = 5, normalCellCount = 20 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(28, 8), normalCellRadius = 5, normalCellCount = 20 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(35, 16), normalCellRadius = 5, normalCellCount = 20 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(40, 10), normalCellRadius = 5, normalCellCount = 20 });
         }
 
         private void LoadStage3_Maze()
@@ -376,21 +375,20 @@ namespace GameOfLife.Manager
             // 스테이지 3: Maze - 미로 생성 규칙 (B3/S12345)
             CreateStageBoundary();
 
-            // 복잡한 미로 구조 (Permanent 벽)
-            CreateHorizontalPlatform(8, 9, 8);
-            CreateHorizontalPlatform(22, 9, 8);
-            CreateHorizontalPlatform(36, 9, 8);
-            CreateVerticalWall(12, 10, 6);
-            CreateVerticalWall(28, 10, 6);
-            CreateBox(16, 16, 5, 4);
-            CreateBox(30, 12, 4, 3);
+            // 복잡한 미로 구조 (Permanent 벽) - 간격을 넓게
+            CreateHorizontalPlatform(8, 9, 6);
+            CreateHorizontalPlatform(24, 9, 6);
+            CreateHorizontalPlatform(38, 9, 6);
+            CreateVerticalWall(16, 11, 4);
+            CreateVerticalWall(32, 11, 4);
+            CreateBox(18, 17, 4, 3);
 
             // 코어 클러스터 배치 (5개)
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(10, 13), normalCellRadius = 5, normalCellCount = 22 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(18, 8), normalCellRadius = 5, normalCellCount = 22 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(25, 18), normalCellRadius = 5, normalCellCount = 22 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(34, 14), normalCellRadius = 5, normalCellCount = 22 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(40, 8), normalCellRadius = 5, normalCellCount = 22 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(11, 14), normalCellRadius = 5, normalCellCount = 22 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(20, 8), normalCellRadius = 5, normalCellCount = 22 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(28, 18), normalCellRadius = 5, normalCellCount = 22 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(36, 14), normalCellRadius = 5, normalCellCount = 22 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(41, 8), normalCellRadius = 5, normalCellCount = 22 });
         }
 
         private void LoadStage4_DayAndNight()
@@ -398,21 +396,20 @@ namespace GameOfLife.Manager
             // 스테이지 4: Day & Night - 매우 활발한 규칙 (B3678/S34678)
             CreateStageBoundary();
 
-            // 복잡한 구조물 (Permanent 벽)
-            CreateBox(10, 10, 4, 4);
-            CreateBox(20, 8, 5, 3);
-            CreateBox(30, 12, 4, 5);
-            CreateHorizontalPlatform(15, 16, 10);
-            CreateVerticalWall(25, 10, 8);
-            CreateVerticalWall(38, 8, 10);
+            // 복잡한 구조물 (Permanent 벽) - 간격을 넓게
+            CreateBox(10, 10, 3, 3);
+            CreateBox(24, 8, 4, 3);
+            CreateBox(36, 12, 3, 4);
+            CreateVerticalWall(18, 14, 5);
+            CreateVerticalWall(30, 10, 5);
 
             // 코어 클러스터 배치 (6개 - 높은 난이도)
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(12, 15), normalCellRadius = 6, normalCellCount = 25 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(18, 10), normalCellRadius = 6, normalCellCount = 25 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(13, 16), normalCellRadius = 6, normalCellCount = 25 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(21, 10), normalCellRadius = 6, normalCellCount = 25 });
             CreateCluster(new ClusterConfig { corePosition = new Vector2Int(27, 8), normalCellRadius = 6, normalCellCount = 25 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(32, 18), normalCellRadius = 6, normalCellCount = 25 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(40, 12), normalCellRadius = 6, normalCellCount = 25 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(36, 20), normalCellRadius = 6, normalCellCount = 25 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(33, 18), normalCellRadius = 6, normalCellCount = 25 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(40, 13), normalCellRadius = 6, normalCellCount = 25 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(38, 20), normalCellRadius = 6, normalCellCount = 25 });
         }
 
         private void LoadStage5_Seeds()
@@ -420,25 +417,24 @@ namespace GameOfLife.Manager
             // 스테이지 5: Seeds - 폭발형 (최고 난이도) (B2/S)
             CreateStageBoundary();
 
-            // 매우 복잡한 맵 구조 (Permanent 벽)
+            // 매우 복잡한 맵 구조 (Permanent 벽) - 간격을 넓게
             CreateBox(8, 8, 3, 3);
-            CreateBox(14, 10, 4, 3);
-            CreateBox(22, 8, 3, 4);
-            CreateBox(28, 12, 5, 4);
-            CreateBox(36, 10, 4, 3);
-            CreateVerticalWall(18, 14, 6);
-            CreateVerticalWall(32, 8, 8);
-            CreateHorizontalPlatform(10, 18, 12);
-            CreateHorizontalPlatform(30, 19, 10);
+            CreateBox(18, 10, 3, 3);
+            CreateBox(28, 8, 3, 3);
+            CreateBox(38, 12, 3, 3);
+            CreateVerticalWall(14, 15, 4);
+            CreateVerticalWall(34, 14, 4);
+            CreateHorizontalPlatform(10, 19, 8);
+            CreateHorizontalPlatform(32, 19, 8);
 
             // 코어 클러스터 배치 (7개 - 최고 난이도)
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(10, 12), normalCellRadius = 6, normalCellCount = 28 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(16, 8), normalCellRadius = 6, normalCellCount = 28 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(24, 14), normalCellRadius = 6, normalCellCount = 28 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(30, 9), normalCellRadius = 6, normalCellCount = 28 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(35, 16), normalCellRadius = 6, normalCellCount = 28 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(40, 11), normalCellRadius = 6, normalCellCount = 28 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(20, 20), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(11, 13), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(20, 8), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(24, 15), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(31, 10), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(37, 16), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(41, 11), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(22, 20), normalCellRadius = 6, normalCellCount = 28 });
         }
 
         private void CreateStageBoundary()
