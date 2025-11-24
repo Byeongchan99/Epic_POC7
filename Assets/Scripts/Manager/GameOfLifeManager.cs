@@ -345,10 +345,10 @@ namespace GameOfLife.Manager
             CreateHorizontalPlatform(8, 10, 10);
             CreateHorizontalPlatform(32, 18, 10);
 
-            // 코어 클러스터 배치 (3개 - 튜토리얼)
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(15, 15), normalCellRadius = 4, normalCellCount = 15 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(28, 10), normalCellRadius = 4, normalCellCount = 15 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(37, 18), normalCellRadius = 4, normalCellCount = 15 });
+            // 코어 클러스터 배치 (3개 - 튜토리얼) - 벽과의 거리 고려 (radius=4, 벽에서 최소 6유닛 이상 떨어짐)
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(13, 15), normalCellRadius = 4, normalCellCount = 15 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(25, 13), normalCellRadius = 4, normalCellCount = 15 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(38, 14), normalCellRadius = 4, normalCellCount = 15 });
         }
 
         private void LoadStage2_HighLife()
@@ -361,11 +361,11 @@ namespace GameOfLife.Manager
             CreateHorizontalPlatform(32, 18, 8);
             CreateVerticalWall(20, 12, 5);
 
-            // 코어 클러스터 배치 (4개)
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(13, 15), normalCellRadius = 5, normalCellCount = 20 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(28, 10), normalCellRadius = 5, normalCellCount = 20 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(35, 16), normalCellRadius = 5, normalCellCount = 20 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(40, 12), normalCellRadius = 5, normalCellCount = 20 });
+            // 코어 클러스터 배치 (4개) - 벽과의 거리 고려 (radius=5, 벽에서 최소 7유닛 이상 떨어짐)
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(13, 14), normalCellRadius = 5, normalCellCount = 20 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(28, 13), normalCellRadius = 5, normalCellCount = 20 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(35, 13), normalCellRadius = 5, normalCellCount = 20 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(40, 20), normalCellRadius = 5, normalCellCount = 20 });
         }
 
         private void LoadStage3_Maze()
@@ -380,12 +380,12 @@ namespace GameOfLife.Manager
             CreateVerticalWall(16, 11, 5);
             CreateVerticalWall(32, 11, 5);
 
-            // 코어 클러스터 배치 (5개)
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(11, 12), normalCellRadius = 5, normalCellCount = 22 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(20, 9), normalCellRadius = 5, normalCellCount = 22 });
+            // 코어 클러스터 배치 (5개) - 벽과의 거리 고려 (radius=5, 벽에서 최소 7유닛 이상 떨어짐)
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(11, 14), normalCellRadius = 5, normalCellCount = 22 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(22, 11), normalCellRadius = 5, normalCellCount = 22 });
             CreateCluster(new ClusterConfig { corePosition = new Vector2Int(28, 18), normalCellRadius = 5, normalCellCount = 22 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(36, 14), normalCellRadius = 5, normalCellCount = 22 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(41, 21), normalCellRadius = 5, normalCellCount = 22 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(38, 13), normalCellRadius = 5, normalCellCount = 22 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(42, 16), normalCellRadius = 5, normalCellCount = 22 });
         }
 
         private void LoadStage4_DayAndNight()
@@ -399,12 +399,12 @@ namespace GameOfLife.Manager
             CreateBox(36, 8, 3, 4);
             CreateVerticalWall(18, 12, 5);
 
-            // 코어 클러스터 배치 (6개 - 높은 난이도)
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(13, 14), normalCellRadius = 6, normalCellCount = 25 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(21, 10), normalCellRadius = 6, normalCellCount = 25 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(27, 20), normalCellRadius = 6, normalCellCount = 25 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(33, 12), normalCellRadius = 6, normalCellCount = 25 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(40, 15), normalCellRadius = 6, normalCellCount = 25 });
+            // 코어 클러스터 배치 (6개 - 높은 난이도) - 벽과의 거리 고려 (radius=6, 벽에서 최소 8유닛 이상 떨어짐)
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(15, 14), normalCellRadius = 6, normalCellCount = 25 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(30, 10), normalCellRadius = 6, normalCellCount = 25 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(20, 20), normalCellRadius = 6, normalCellCount = 25 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(33, 14), normalCellRadius = 6, normalCellCount = 25 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(42, 12), normalCellRadius = 6, normalCellCount = 25 });
             CreateCluster(new ClusterConfig { corePosition = new Vector2Int(38, 20), normalCellRadius = 6, normalCellCount = 25 });
         }
 
@@ -423,14 +423,14 @@ namespace GameOfLife.Manager
             CreateHorizontalPlatform(10, 21, 8);
             CreateHorizontalPlatform(32, 21, 8);
 
-            // 코어 클러스터 배치 (7개 - 최고 난이도)
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(11, 12), normalCellRadius = 6, normalCellCount = 28 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(20, 8), normalCellRadius = 6, normalCellCount = 28 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(24, 17), normalCellRadius = 6, normalCellCount = 28 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(31, 10), normalCellRadius = 6, normalCellCount = 28 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(37, 19), normalCellRadius = 6, normalCellCount = 28 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(41, 9), normalCellRadius = 6, normalCellCount = 28 });
-            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(22, 21), normalCellRadius = 6, normalCellCount = 28 });
+            // 코어 클러스터 배치 (7개 - 최고 난이도) - 벽과의 거리 고려 (radius=6, 벽에서 최소 8유닛 이상 떨어짐)
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(22, 10), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(12, 18), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(26, 19), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(40, 11), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(32, 14), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(42, 20), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(20, 15), normalCellRadius = 6, normalCellCount = 28 });
         }
 
         private void CreateStageBoundary()
