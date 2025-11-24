@@ -105,7 +105,7 @@ namespace GameOfLife.Core
             return cells;
         }
 
-        public void SetCellAlive(int x, int y, bool alive, CellType type = CellType.Enemy)
+        public void SetCellAlive(int x, int y, bool alive, CellType type = CellType.Normal)
         {
             if (IsInBounds(x, y))
             {

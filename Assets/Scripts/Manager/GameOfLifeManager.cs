@@ -678,21 +678,6 @@ namespace GameOfLife.Manager
             }
         }
 
-        /// <summary>
-        /// 특정 위치에 세포를 생성합니다 (우클릭 공격)
-        /// </summary>
-        public void PlaceCell(int x, int y)
-        {
-            if (gridManager.IsInBounds(x, y))
-            {
-                Cell cell = gridManager.GetCell(x, y);
-                if (!cell.IsAlive)
-                {
-                    gridManager.SetCellAlive(x, y, true, CellType.Player);
-                }
-            }
-        }
-
         // === 클러스터 시스템 ===
 
         /// <summary>

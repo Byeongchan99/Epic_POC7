@@ -179,13 +179,6 @@ namespace GameOfLife.Player
                     lastFireTime = Time.time;
                 }
             }
-
-            // 우클릭: 세포 생성
-            if (Input.GetMouseButtonDown(1))
-            {
-                Vector2Int gridPos = gameManager.Grid.WorldToGridPosition(mouseWorldPos);
-                gameManager.PlaceCell(gridPos.x, gridPos.y);
-            }
         }
 
         private void ShootProjectile(Vector3 targetWorldPos)
