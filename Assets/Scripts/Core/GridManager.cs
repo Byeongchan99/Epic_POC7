@@ -113,5 +113,17 @@ namespace GameOfLife.Core
                 grid[x, y].Type = type;
             }
         }
+
+        public void ClearGrid()
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    grid[x, y].IsAlive = false;
+                    grid[x, y].Type = CellType.Normal;
+                }
+            }
+        }
     }
 }

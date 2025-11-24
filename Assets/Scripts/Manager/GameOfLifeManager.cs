@@ -780,5 +780,42 @@ namespace GameOfLife.Manager
 
             Debug.Log($"Core destroyed at ({coreX}, {coreY}), cleared {radius} radius");
         }
+
+        /// <summary>
+        /// StageData를 불러와서 현재 그리드에 적용
+        /// </summary>
+        public void LoadStageDataToGrid(StageData stageData)
+        {
+            if (stageData == null)
+            {
+                Debug.LogWarning("StageData is null!");
+                return;
+            }
+
+            // 그리드 초기화
+            gridManager.ClearGrid();
+
+            // 외곽 경계 생성
+            CreateStageBoundary();
+
+            // Permanent 셀 배치
+            foreach (var cellData in stageData.permanentCells)
+            {
+                gridManager.SetCellAlive(cellData.position.x, cellData.position.y, true, CellType.Permanent);
+            }
+
+            // Core 클러스터 배치
+            foreach (var clusterData in stageData.coreClusters)
+            {
+                CreateCluster(new ClusterConfig
+                {
+                    corePosition = clusterData.corePosition,
+                    normalCellRadius = clusterData.normalCellRadius,
+                    normalCellCount = clusterData.normalCellCount
+                });
+            }
+
+            Debug.Log($"Loaded StageData: {stageData.permanentCells.Count} permanent cells, {stageData.coreClusters.Count} core clusters");
+        }
     }
 }
