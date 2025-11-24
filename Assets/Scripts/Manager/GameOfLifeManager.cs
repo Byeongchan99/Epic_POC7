@@ -338,73 +338,107 @@ namespace GameOfLife.Manager
 
         private void LoadStage1_Conway()
         {
-            // 스테이지 1: 튜토리얼 - 기본 콘웨이 규칙
+            // 스테이지 1: 튜토리얼 - 기본 콘웨이 규칙 (B3/S23)
             CreateStageBoundary();
 
-            // 간단한 미로
-            CreateHorizontalPlatform(10, 10, 12);
-            CreateHorizontalPlatform(28, 10, 12);
-            CreateHorizontalPlatform(15, 18, 20);
+            // 간단한 맵 구조 (Permanent 벽)
+            CreateHorizontalPlatform(10, 12, 10);
+            CreateHorizontalPlatform(30, 12, 10);
+            CreateVerticalWall(20, 8, 10);
 
-            // 초기 패턴
-            SpawnGliderPattern(12, 12);
-            SpawnBlinkerPattern(30, 15);
+            // 코어 클러스터 배치 (3개 - 튜토리얼)
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(15, 15), normalCellRadius = 4, normalCellCount = 15 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(25, 10), normalCellRadius = 4, normalCellCount = 15 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(35, 18), normalCellRadius = 4, normalCellCount = 15 });
         }
 
         private void LoadStage2_HighLife()
         {
-            // 스테이지 2: HighLife - Replicator 패턴
+            // 스테이지 2: HighLife - Replicator 패턴 (B36/S23)
             CreateStageBoundary();
 
-            // 복잡한 미로
-            CreateHorizontalPlatform(8, 8, 15);
-            CreateHorizontalPlatform(27, 8, 15);
-            CreateVerticalWall(23, 10, 8);
-            CreateBox(15, 14, 8, 3);
+            // 미로형 맵 구조 (Permanent 벽)
+            CreateHorizontalPlatform(10, 10, 12);
+            CreateHorizontalPlatform(28, 10, 12);
+            CreateVerticalWall(15, 8, 8);
+            CreateVerticalWall(35, 12, 8);
+            CreateBox(20, 15, 6, 4);
 
-            // HighLife 특화 패턴
-            SpawnReplicatorPattern(10, 12);
-            SpawnPulsarPattern(32, 18);
+            // 코어 클러스터 배치 (4개)
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(12, 15), normalCellRadius = 5, normalCellCount = 20 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(25, 8), normalCellRadius = 5, normalCellCount = 20 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(32, 16), normalCellRadius = 5, normalCellCount = 20 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(38, 10), normalCellRadius = 5, normalCellCount = 20 });
         }
 
         private void LoadStage3_Maze()
         {
-            // 스테이지 3: Maze - 미로 생성 규칙
+            // 스테이지 3: Maze - 미로 생성 규칙 (B3/S12345)
             CreateStageBoundary();
 
-            // 미로 규칙이 자동으로 미로를 생성하므로 초기 씨앗만 배치
-            for (int i = 0; i < 5; i++)
-            {
-                int x = Random.Range(10, 40);
-                int y = Random.Range(10, 20);
-                CreateBox(x, y, 3, 3);
-            }
+            // 복잡한 미로 구조 (Permanent 벽)
+            CreateHorizontalPlatform(8, 9, 8);
+            CreateHorizontalPlatform(22, 9, 8);
+            CreateHorizontalPlatform(36, 9, 8);
+            CreateVerticalWall(12, 10, 6);
+            CreateVerticalWall(28, 10, 6);
+            CreateBox(16, 16, 5, 4);
+            CreateBox(30, 12, 4, 3);
+
+            // 코어 클러스터 배치 (5개)
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(10, 13), normalCellRadius = 5, normalCellCount = 22 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(18, 8), normalCellRadius = 5, normalCellCount = 22 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(25, 18), normalCellRadius = 5, normalCellCount = 22 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(34, 14), normalCellRadius = 5, normalCellCount = 22 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(40, 8), normalCellRadius = 5, normalCellCount = 22 });
         }
 
         private void LoadStage4_DayAndNight()
         {
-            // 스테이지 4: Day & Night - 매우 활발한 규칙
+            // 스테이지 4: Day & Night - 매우 활발한 규칙 (B3678/S34678)
             CreateStageBoundary();
 
-            // 안전 지대 (플레이어용)
-            CreateBox(12, 12, 6, 6);
+            // 복잡한 구조물 (Permanent 벽)
+            CreateBox(10, 10, 4, 4);
+            CreateBox(20, 8, 5, 3);
+            CreateBox(30, 12, 4, 5);
+            CreateHorizontalPlatform(15, 16, 10);
+            CreateVerticalWall(25, 10, 8);
+            CreateVerticalWall(38, 8, 10);
 
-            // 초기 폭발 지점
-            SpawnAcornPattern(25, 15);
-            SpawnRPentominoPattern(18, 20);
+            // 코어 클러스터 배치 (6개 - 높은 난이도)
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(12, 15), normalCellRadius = 6, normalCellCount = 25 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(18, 10), normalCellRadius = 6, normalCellCount = 25 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(27, 8), normalCellRadius = 6, normalCellCount = 25 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(32, 18), normalCellRadius = 6, normalCellCount = 25 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(40, 12), normalCellRadius = 6, normalCellCount = 25 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(36, 20), normalCellRadius = 6, normalCellCount = 25 });
         }
 
         private void LoadStage5_Seeds()
         {
-            // 스테이지 5: Seeds - 폭발형 (최고 난이도)
+            // 스테이지 5: Seeds - 폭발형 (최고 난이도) (B2/S)
             CreateStageBoundary();
 
-            // 플레이어 시작 지점 보호
-            CreateBox(23, 20, 4, 4);
+            // 매우 복잡한 맵 구조 (Permanent 벽)
+            CreateBox(8, 8, 3, 3);
+            CreateBox(14, 10, 4, 3);
+            CreateBox(22, 8, 3, 4);
+            CreateBox(28, 12, 5, 4);
+            CreateBox(36, 10, 4, 3);
+            CreateVerticalWall(18, 14, 6);
+            CreateVerticalWall(32, 8, 8);
+            CreateHorizontalPlatform(10, 18, 12);
+            CreateHorizontalPlatform(30, 19, 10);
 
-            // Seeds 패턴 (2개 이웃이면 탄생)
-            SpawnBlinkerPattern(15, 15);
-            SpawnBlinkerPattern(35, 15);
+            // 코어 클러스터 배치 (7개 - 최고 난이도)
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(10, 12), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(16, 8), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(24, 14), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(30, 9), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(35, 16), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(40, 11), normalCellRadius = 6, normalCellCount = 28 });
+            CreateCluster(new ClusterConfig { corePosition = new Vector2Int(20, 20), normalCellRadius = 6, normalCellCount = 28 });
         }
 
         private void CreateStageBoundary()
