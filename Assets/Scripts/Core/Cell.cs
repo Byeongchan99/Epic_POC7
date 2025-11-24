@@ -13,7 +13,7 @@ namespace GameOfLife.Core
         public bool WillBeAlive { get; set; } // 다음 턴에 살아있을지 예측
         public CellType Type { get; set; }
 
-        public Cell(int x, int y, bool isAlive = false, CellType type = CellType.Enemy)
+        public Cell(int x, int y, bool isAlive = false, CellType type = CellType.Normal)
         {
             X = x;
             Y = y;
@@ -28,12 +28,15 @@ namespace GameOfLife.Core
         }
     }
 
+    /// <summary>
+    /// 셀의 종류
+    /// </summary>
     public enum CellType
     {
-        Enemy,      // 흰색 세포 (적)
-        Player,     // 붉은색 플레이어
-        Placed,     // 플레이어가 설치한 세포
-        Kernel      // 목표 지점 (스테이지 클리어)
+        Normal,     // 일반 셀: 공격 O, 생명 로직 O (흰색 적 세포)
+        Permanent,  // 영구 셀: 공격 X, 생명 로직 X (검은 회색 벽/맵)
+        Core,       // 코어 셀: 공격 O, 생명 로직 X (빨간색 핵심 타겟)
+        Player      // 플레이어 셀: 공격 X, 생명 로직 O (초록색 설치 세포)
     }
 
     /// <summary>
@@ -56,6 +59,18 @@ namespace GameOfLife.Core
     {
         public GameRuleType ruleType;
         public Vector2Int playerStartPosition;
-        public Vector2Int kernelPosition;
+        public Vector2Int kernelPosition; // 이제는 클리어 지점으로만 사용
+        public ClusterConfig[] clusters; // 코어 클러스터 설정
+    }
+
+    /// <summary>
+    /// 셀 클러스터 설정 (코어 + 주변 일반 셀)
+    /// </summary>
+    [System.Serializable]
+    public class ClusterConfig
+    {
+        public Vector2Int corePosition;  // 코어 위치
+        public int normalCellRadius = 5; // 코어 주변 일반 셀 생성 반경
+        public int normalCellCount = 20; // 생성할 일반 셀 개수
     }
 }

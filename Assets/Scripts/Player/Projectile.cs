@@ -60,13 +60,26 @@ namespace GameOfLife.Player
                         Cell cell = gameManager.Grid.GetCell(x, y);
                         if (cell != null && cell.IsAlive)
                         {
+                            // Permanent 셀은 파괴 불가
+                            if (cell.Type == CellType.Permanent)
+                                continue;
+
                             Vector3 cellWorldPos = gameManager.Grid.GridToWorldPosition(x, y);
                             float distance = Vector3.Distance(transform.position, cellWorldPos);
 
                             if (distance <= damageRadius)
                             {
-                                // 셀 파괴
-                                gameManager.DeleteCell(x, y);
+                                // 코어 파괴 시 주변 셀 연쇄 파괴
+                                if (cell.Type == CellType.Core)
+                                {
+                                    gameManager.DestroyCoreAndSurroundingCells(x, y, 10);
+                                    Debug.Log($"Core destroyed! Chained destruction at ({x}, {y})");
+                                }
+                                else
+                                {
+                                    // 일반 셀 또는 플레이어 셀만 파괴
+                                    gameManager.DeleteCell(x, y);
+                                }
 
                                 // 총알 파괴
                                 Destroy(gameObject);

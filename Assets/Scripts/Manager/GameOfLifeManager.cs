@@ -134,8 +134,8 @@ namespace GameOfLife.Manager
                 {
                     Cell cell = gridManager.GetCell(x, y);
 
-                    // 커널과 플레이어 설치 세포는 규칙 적용 제외
-                    if (cell.Type == CellType.Kernel || cell.Type == CellType.Placed)
+                    // Permanent(벽)와 Core(코어)는 생명 로직 적용 제외
+                    if (cell.Type == CellType.Permanent || cell.Type == CellType.Core)
                     {
                         cell.WillBeAlive = cell.IsAlive;
                         continue;
@@ -178,7 +178,7 @@ namespace GameOfLife.Manager
             else
             {
                 cell.WillBeAlive = (neighbors == 3);
-                if (cell.WillBeAlive) cell.Type = CellType.Enemy;
+                if (cell.WillBeAlive) cell.Type = CellType.Normal;
             }
         }
 
@@ -192,7 +192,7 @@ namespace GameOfLife.Manager
             else
             {
                 cell.WillBeAlive = (neighbors == 3 || neighbors == 6);
-                if (cell.WillBeAlive) cell.Type = CellType.Enemy;
+                if (cell.WillBeAlive) cell.Type = CellType.Normal;
             }
         }
 
@@ -206,7 +206,7 @@ namespace GameOfLife.Manager
             else
             {
                 cell.WillBeAlive = (neighbors == 3);
-                if (cell.WillBeAlive) cell.Type = CellType.Enemy;
+                if (cell.WillBeAlive) cell.Type = CellType.Normal;
             }
         }
 
@@ -222,7 +222,7 @@ namespace GameOfLife.Manager
             {
                 cell.WillBeAlive = (neighbors == 3 || neighbors == 6 ||
                                    neighbors == 7 || neighbors == 8);
-                if (cell.WillBeAlive) cell.Type = CellType.Enemy;
+                if (cell.WillBeAlive) cell.Type = CellType.Normal;
             }
         }
 
@@ -236,7 +236,7 @@ namespace GameOfLife.Manager
             else
             {
                 cell.WillBeAlive = (neighbors == 2);
-                if (cell.WillBeAlive) cell.Type = CellType.Enemy;
+                if (cell.WillBeAlive) cell.Type = CellType.Normal;
             }
         }
 
@@ -499,34 +499,34 @@ namespace GameOfLife.Manager
             SpawnAcornPattern(30, 22); // Acorn 증식 패턴
         }
 
-        private void CreateHorizontalPlatform(int startX, int y, int length)
+        private void CreateHorizontalPlatform(int startX, int y, int length, CellType type = CellType.Permanent)
         {
             for (int x = startX; x < startX + length && x < gridWidth; x++)
             {
-                gridManager.SetCellAlive(x, y, true);
+                gridManager.SetCellAlive(x, y, true, type);
             }
         }
 
-        private void CreateVerticalWall(int x, int startY, int height)
+        private void CreateVerticalWall(int x, int startY, int height, CellType type = CellType.Permanent)
         {
             for (int y = startY; y < startY + height && y < gridHeight; y++)
             {
-                gridManager.SetCellAlive(x, y, true);
+                gridManager.SetCellAlive(x, y, true, type);
             }
         }
 
-        private void CreateBox(int startX, int startY, int width, int height)
+        private void CreateBox(int startX, int startY, int width, int height, CellType type = CellType.Permanent)
         {
             for (int x = startX; x < startX + width && x < gridWidth; x++)
             {
                 for (int y = startY; y < startY + height && y < gridHeight; y++)
                 {
-                    gridManager.SetCellAlive(x, y, true);
+                    gridManager.SetCellAlive(x, y, true, type);
                 }
             }
         }
 
-        private void CreateStairs(int startX, int startY, int steps, bool ascending)
+        private void CreateStairs(int startX, int startY, int steps, bool ascending, CellType type = CellType.Permanent)
         {
             for (int i = 0; i < steps; i++)
             {
@@ -535,7 +535,7 @@ namespace GameOfLife.Manager
 
                 if (x < gridWidth && y < gridHeight)
                 {
-                    gridManager.SetCellAlive(x, y, true);
+                    gridManager.SetCellAlive(x, y, true, type);
                 }
             }
         }
@@ -688,9 +688,83 @@ namespace GameOfLife.Manager
                 Cell cell = gridManager.GetCell(x, y);
                 if (!cell.IsAlive)
                 {
-                    gridManager.SetCellAlive(x, y, true, CellType.Placed);
+                    gridManager.SetCellAlive(x, y, true, CellType.Player);
                 }
             }
+        }
+
+        // === 클러스터 시스템 ===
+
+        /// <summary>
+        /// 클러스터를 생성합니다 (코어 + 주변 일반 셀)
+        /// </summary>
+        private void CreateCluster(ClusterConfig config)
+        {
+            if (config == null) return;
+
+            // 코어 생성
+            Vector2Int corePos = config.corePosition;
+            gridManager.SetCellAlive(corePos.x, corePos.y, true, CellType.Core);
+
+            // 코어 주변에 랜덤하게 일반 셀 배치
+            int cellsPlaced = 0;
+            int attempts = 0;
+            int maxAttempts = config.normalCellCount * 3; // 무한루프 방지
+
+            while (cellsPlaced < config.normalCellCount && attempts < maxAttempts)
+            {
+                attempts++;
+
+                // 코어 주변 반경 내 랜덤 위치
+                int offsetX = Random.Range(-config.normalCellRadius, config.normalCellRadius + 1);
+                int offsetY = Random.Range(-config.normalCellRadius, config.normalCellRadius + 1);
+
+                int x = corePos.x + offsetX;
+                int y = corePos.y + offsetY;
+
+                // 그리드 범위 체크
+                if (!gridManager.IsInBounds(x, y)) continue;
+
+                // 이미 셀이 있으면 스킵
+                Cell cell = gridManager.GetCell(x, y);
+                if (cell.IsAlive) continue;
+
+                // 코어 위치는 스킵
+                if (x == corePos.x && y == corePos.y) continue;
+
+                // 일반 셀 배치
+                gridManager.SetCellAlive(x, y, true, CellType.Normal);
+                cellsPlaced++;
+            }
+
+            Debug.Log($"Created cluster at {corePos} with {cellsPlaced} normal cells");
+        }
+
+        /// <summary>
+        /// 코어 파괴 시 주변 일반 셀 제거
+        /// </summary>
+        public void DestroyCoreAndSurroundingCells(int coreX, int coreY, int radius = 10)
+        {
+            // 반경 내 모든 Normal 셀 제거
+            for (int x = coreX - radius; x <= coreX + radius; x++)
+            {
+                for (int y = coreY - radius; y <= coreY + radius; y++)
+                {
+                    if (!gridManager.IsInBounds(x, y)) continue;
+
+                    // 거리 계산 (원형 범위)
+                    float distance = Mathf.Sqrt((x - coreX) * (x - coreX) + (y - coreY) * (y - coreY));
+                    if (distance > radius) continue;
+
+                    Cell cell = gridManager.GetCell(x, y);
+                    if (cell.Type == CellType.Normal)
+                    {
+                        gridManager.SetCellAlive(x, y, false);
+                    }
+                }
+            }
+
+            Debug.Log($"Core destroyed at ({coreX}, {coreY}), cleared {radius} radius");
         }
     }
 }

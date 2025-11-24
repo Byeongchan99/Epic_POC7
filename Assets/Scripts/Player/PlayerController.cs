@@ -302,7 +302,7 @@ namespace GameOfLife.Player
                             continue;
 
                         Cell cell = gameManager.Grid.GetCell(checkX, checkY);
-                        if (cell != null && cell.IsAlive && cell.Type == CellType.Enemy)
+                        if (cell != null && cell.IsAlive && cell.Type == CellType.Normal)
                         {
                             // 실제 거리 기반 충돌 판정
                             Vector3 cellWorldPos = gameManager.Grid.GridToWorldPosition(checkX, checkY);
