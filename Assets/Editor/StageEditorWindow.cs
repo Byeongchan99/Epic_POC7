@@ -498,13 +498,25 @@ public class StageEditorWindow : EditorWindow
         if (currentStageData == null) return;
 
         if (EditorUtility.DisplayDialog("Clear Stage Data",
-            "Are you sure you want to clear all data from this stage?",
+            "Are you sure you want to clear all data from this stage?\nThis will also clear all cells from the Scene View.",
             "Yes", "No"))
         {
+            // Clear StageData
             currentStageData.Clear();
             EditorUtility.SetDirty(currentStageData);
             AssetDatabase.SaveAssets();
-            Debug.Log("Cleared stage data");
+
+            // Clear Grid as well
+            if (gameManager != null && gameManager.Grid != null)
+            {
+                gameManager.Grid.ClearGrid();
+                SceneView.RepaintAll();
+                Debug.Log("Cleared stage data and grid");
+            }
+            else
+            {
+                Debug.Log("Cleared stage data");
+            }
         }
     }
 }
