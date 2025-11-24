@@ -26,9 +26,12 @@ namespace GameOfLife.Visual
 
         void Start()
         {
+            Debug.Log("CellVisualizer Start() called");
+
             if (gameManager == null)
             {
                 gameManager = FindFirstObjectByType<GameOfLifeManager>();
+                Debug.Log($"CellVisualizer: Found GameManager = {gameManager != null}");
             }
 
             if (gameManager == null)
@@ -39,17 +42,40 @@ namespace GameOfLife.Visual
 
             if (gameManager.Grid == null)
             {
-                Debug.LogError("CellVisualizer: GameOfLifeManager.Grid is null!");
+                Debug.LogError("CellVisualizer: GameOfLifeManager.Grid is null! Retrying in next frame...");
+                StartCoroutine(InitializeDelayed());
                 return;
             }
 
             if (cellPrefab == null)
             {
+                Debug.Log("CellVisualizer: Creating default cell prefab");
                 CreateDefaultCellPrefab();
             }
 
             InitializeVisuals();
             Debug.Log($"CellVisualizer initialized with {gameManager.Grid.Width}x{gameManager.Grid.Height} grid");
+        }
+
+        private System.Collections.IEnumerator InitializeDelayed()
+        {
+            // 다음 프레임까지 대기 (GameOfLifeManager의 Awake가 실행될 때까지)
+            yield return null;
+
+            if (gameManager.Grid == null)
+            {
+                Debug.LogError("CellVisualizer: GameOfLifeManager.Grid is still null after delay!");
+                yield break;
+            }
+
+            if (cellPrefab == null)
+            {
+                Debug.Log("CellVisualizer: Creating default cell prefab (delayed)");
+                CreateDefaultCellPrefab();
+            }
+
+            InitializeVisuals();
+            Debug.Log($"CellVisualizer initialized (delayed) with {gameManager.Grid.Width}x{gameManager.Grid.Height} grid");
         }
 
         void LateUpdate()
@@ -89,6 +115,9 @@ namespace GameOfLife.Visual
             GridManager grid = gameManager.Grid;
             cellRenderers = new SpriteRenderer[grid.Width, grid.Height];
 
+            Debug.Log($"InitializeVisuals: Creating {grid.Width * grid.Height} cell objects...");
+            int createdCount = 0;
+
             for (int x = 0; x < grid.Width; x++)
             {
                 for (int y = 0; y < grid.Height; y++)
@@ -104,8 +133,11 @@ namespace GameOfLife.Visual
                     SpriteRenderer sr = cellObj.GetComponent<SpriteRenderer>();
                     cellRenderers[x, y] = sr;
                     sr.enabled = false; // 초기에는 비활성화
+                    createdCount++;
                 }
             }
+
+            Debug.Log($"InitializeVisuals: Successfully created {createdCount} cell objects under {transform.name}");
         }
 
         private void UpdateVisuals()
