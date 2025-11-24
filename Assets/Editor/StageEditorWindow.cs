@@ -19,7 +19,11 @@ public class StageEditorWindow : EditorWindow
 
     // Grid visualization
     private bool showGrid = true;
+    private bool showCells = true;
     private Color gridColor = new Color(0.5f, 0.5f, 0.5f, 0.3f);
+    private Color permanentCellColor = new Color(0.3f, 0.3f, 0.3f, 0.8f);
+    private Color coreCellColor = new Color(1f, 0.2f, 0.2f, 0.8f);
+    private Color normalCellColor = new Color(1f, 1f, 1f, 0.6f);
 
     [MenuItem("Tools/Stage Editor")]
     public static void ShowWindow()
@@ -91,6 +95,7 @@ public class StageEditorWindow : EditorWindow
         // Grid visualization
         EditorGUILayout.LabelField("Visualization", EditorStyles.boldLabel);
         showGrid = EditorGUILayout.Toggle("Show Grid", showGrid);
+        showCells = EditorGUILayout.Toggle("Show Cells", showCells);
 
         EditorGUILayout.Space();
 
@@ -173,6 +178,12 @@ public class StageEditorWindow : EditorWindow
             DrawGrid();
         }
 
+        // Draw cells
+        if (showCells)
+        {
+            DrawCells();
+        }
+
         // Handle mouse input - 이벤트를 먼저 캡처
         int controlID = GUIUtility.GetControlID(FocusType.Passive);
         HandleUtility.AddDefaultControl(controlID);
@@ -188,25 +199,81 @@ public class StageEditorWindow : EditorWindow
 
     private void DrawGrid()
     {
-        Handles.color = gridColor;
-
         int gridWidth = gameManager.Grid.Width;
         int gridHeight = gameManager.Grid.Height;
+
+        Handles.color = gridColor;
 
         // Draw vertical lines
         for (int x = 0; x <= gridWidth; x++)
         {
-            Vector3 start = new Vector3(x, 0, 0);
-            Vector3 end = new Vector3(x, gridHeight, 0);
+            Vector3 start = new Vector3(x - 0.5f, -0.5f, 0);
+            Vector3 end = new Vector3(x - 0.5f, gridHeight - 0.5f, 0);
             Handles.DrawLine(start, end);
         }
 
         // Draw horizontal lines
         for (int y = 0; y <= gridHeight; y++)
         {
-            Vector3 start = new Vector3(0, y, 0);
-            Vector3 end = new Vector3(gridWidth, y, 0);
+            Vector3 start = new Vector3(-0.5f, y - 0.5f, 0);
+            Vector3 end = new Vector3(gridWidth - 0.5f, y - 0.5f, 0);
             Handles.DrawLine(start, end);
+        }
+
+        // Draw boundary box (thicker)
+        Handles.color = new Color(1f, 1f, 0f, 0.5f);
+        Vector3[] boundaryPoints = new Vector3[]
+        {
+            new Vector3(-0.5f, -0.5f, 0),
+            new Vector3(gridWidth - 0.5f, -0.5f, 0),
+            new Vector3(gridWidth - 0.5f, gridHeight - 0.5f, 0),
+            new Vector3(-0.5f, gridHeight - 0.5f, 0),
+            new Vector3(-0.5f, -0.5f, 0)
+        };
+        Handles.DrawAAPolyLine(3f, boundaryPoints);
+    }
+
+    private void DrawCells()
+    {
+        int gridWidth = gameManager.Grid.Width;
+        int gridHeight = gameManager.Grid.Height;
+
+        for (int x = 0; x < gridWidth; x++)
+        {
+            for (int y = 0; y < gridHeight; y++)
+            {
+                Cell cell = gameManager.Grid.GetCell(x, y);
+                if (cell != null && cell.IsAlive)
+                {
+                    Color cellColor;
+                    switch (cell.Type)
+                    {
+                        case CellType.Permanent:
+                            cellColor = permanentCellColor;
+                            break;
+                        case CellType.Core:
+                            cellColor = coreCellColor;
+                            break;
+                        case CellType.Normal:
+                            cellColor = normalCellColor;
+                            break;
+                        default:
+                            cellColor = Color.white;
+                            break;
+                    }
+
+                    // Draw filled rectangle for cell
+                    Vector3[] verts = new Vector3[]
+                    {
+                        new Vector3(x - 0.5f, y - 0.5f, 0),
+                        new Vector3(x + 0.5f, y - 0.5f, 0),
+                        new Vector3(x + 0.5f, y + 0.5f, 0),
+                        new Vector3(x - 0.5f, y + 0.5f, 0)
+                    };
+
+                    Handles.DrawSolidRectangleWithOutline(verts, cellColor, Color.clear);
+                }
+            }
         }
     }
 
@@ -299,6 +366,9 @@ public class StageEditorWindow : EditorWindow
                 Debug.Log($"Placed Core cluster at ({x}, {y}) with radius {coreRadius}");
                 break;
         }
+
+        // Force repaint to show changes immediately
+        SceneView.RepaintAll();
     }
 
     private void RemoveCellAt(int x, int y)
@@ -323,6 +393,9 @@ public class StageEditorWindow : EditorWindow
             }
 
             Debug.Log($"Removed cell at ({x}, {y})");
+
+            // Force repaint to show changes immediately
+            SceneView.RepaintAll();
         }
     }
 
