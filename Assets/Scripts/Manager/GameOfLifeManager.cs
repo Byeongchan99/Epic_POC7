@@ -26,6 +26,11 @@ namespace GameOfLife.Manager
             new StageConfig { ruleType = GameRuleType.DayAndNight, playerStartPosition = new Vector2Int(15, 15), kernelPosition = new Vector2Int(38, 22) },
             new StageConfig { ruleType = GameRuleType.Seeds, playerStartPosition = new Vector2Int(25, 22), kernelPosition = new Vector2Int(25, 8) }
         };
+
+        [Header("Custom Stage Data")]
+        [Tooltip("커스텀 스테이지 데이터를 할당하면 기본 스테이지 대신 사용됩니다")]
+        [SerializeField] private StageData[] customStageData = new StageData[5];
+
         [SerializeField] private bool spawnInitialPattern = true;
 
         [Header("Auto Spawn Settings")]
@@ -291,26 +296,37 @@ namespace GameOfLife.Manager
             ClearGrid();
             CreateKernel(); // 커널 생성 또는 위치 업데이트
 
-            switch (stage)
+            // 커스텀 StageData가 할당되어 있으면 그것을 사용
+            if (customStageData != null && currentStageIndex < customStageData.Length &&
+                customStageData[currentStageIndex] != null)
             {
-                case GameRuleType.ConwayLife:
-                    LoadStage1_Conway();
-                    break;
-                case GameRuleType.HighLife:
-                    LoadStage2_HighLife();
-                    break;
-                case GameRuleType.Maze:
-                    LoadStage3_Maze();
-                    break;
-                case GameRuleType.DayAndNight:
-                    LoadStage4_DayAndNight();
-                    break;
-                case GameRuleType.Seeds:
-                    LoadStage5_Seeds();
-                    break;
+                LoadStageDataToGrid(customStageData[currentStageIndex]);
+                Debug.Log($"Loaded Custom Stage: {stage} (from StageData: {customStageData[currentStageIndex].name})");
             }
+            else
+            {
+                // 기본 하드코딩된 스테이지 사용
+                switch (stage)
+                {
+                    case GameRuleType.ConwayLife:
+                        LoadStage1_Conway();
+                        break;
+                    case GameRuleType.HighLife:
+                        LoadStage2_HighLife();
+                        break;
+                    case GameRuleType.Maze:
+                        LoadStage3_Maze();
+                        break;
+                    case GameRuleType.DayAndNight:
+                        LoadStage4_DayAndNight();
+                        break;
+                    case GameRuleType.Seeds:
+                        LoadStage5_Seeds();
+                        break;
+                }
 
-            Debug.Log($"Loaded Stage: {stage}");
+                Debug.Log($"Loaded Default Stage: {stage}");
+            }
         }
 
         private void CreateKernel()
