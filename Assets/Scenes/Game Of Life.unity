@@ -324,10 +324,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameManager: {fileID: 1938274773}
   cellPrefab: {fileID: 0}
-  enemyColor: {r: 1, g: 1, b: 1, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  permanentColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+  coreColor: {r: 1, g: 0.2, b: 0.2, a: 1}
   playerColor: {r: 1, g: 0, b: 0, a: 1}
-  placedColor: {r: 1, g: 0.5, b: 0.5, a: 1}
-  kernelColor: {r: 0, g: 1, b: 0, a: 1}
   previewColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.3}
   showPreview: 1
 --- !u!1 &263335187
@@ -685,7 +685,7 @@ MonoBehaviour:
   gameManager: {fileID: 1938274773}
   mainCamera: {fileID: 0}
   moveSpeed: 5
-  playerColor: {r: 1, g: 0, b: 0, a: 1}
+  playerColor: {r: 0, g: 1, b: 0.060156345, a: 1}
   maxHealth: 3
   invincibilityDuration: 1
   projectilePrefab: {fileID: 0}
@@ -2086,18 +2086,23 @@ MonoBehaviour:
   - ruleType: 0
     playerStartPosition: {x: 8, y: 8}
     kernelPosition: {x: 42, y: 22}
+    clusters: []
   - ruleType: 1
     playerStartPosition: {x: 7, y: 10}
     kernelPosition: {x: 40, y: 20}
+    clusters: []
   - ruleType: 2
     playerStartPosition: {x: 7, y: 7}
     kernelPosition: {x: 43, y: 23}
+    clusters: []
   - ruleType: 3
     playerStartPosition: {x: 15, y: 15}
     kernelPosition: {x: 38, y: 22}
+    clusters: []
   - ruleType: 4
     playerStartPosition: {x: 25, y: 22}
     kernelPosition: {x: 25, y: 8}
+    clusters: []
   spawnInitialPattern: 1
   autoSpawnPatterns: 1
   spawnInterval: 15
